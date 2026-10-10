@@ -165,12 +165,12 @@ def ws_listen(token, seconds, raw, host=WS_HOST, port=443, tls=True):
         sock.close()
 
 
+# Bewusst NICHT enthalten: ratedPower (regelt das Gerät bei emCommStatus=1 selbst
+# nach dem Smart Meter) und emCommStatus (Smart-Meter-Schalter).
 WRITABLE_KEYS = {
     "batteryChargeLimit",
     "batteryDischargeLimit",
     "batteryPriorityModeStatus",
-    "emCommStatus",
-    "ratedPower",
 }
 
 

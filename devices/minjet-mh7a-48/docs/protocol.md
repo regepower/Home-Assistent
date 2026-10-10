@@ -93,8 +93,23 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 - **Benachrichtigungen:** `app/notice/queryDeviceDetailNoticeList/{deviceId}` → `{total, rows:[{date, messages:[{appNoticeId, hasRead, time, title:"Warning message", message:"Niedrige SOC"}]}]}`; `app/notice/queryAppNoticeList` → `data.deviceList[].lastMessage/unReadMessageCount`; `queryUnreadMessageCount` → `data: <Zahl>`. Zeitstempel ohne Zeitzone (Server-Zeit), Zeitzone noch ungeklärt (App-Anzeige stimmt laut Nutzer nicht).
 
 ## Schreibzugriffe (aus der App-Logik gelesen, NICHT getestet)
+
+> Status: **ungetestet**. Entscheidung: nicht schreiben, solange nicht nötig; Lesen reicht für HA. Die Hinweise unten dienen der Dokumentation.
 - Balcony (MH7A): `POST photovoltaic/setRatedPower/{serialNum}` mit JSON `{"key": <Property>, "value": <Wert>}` (dio-Default, keine Sonderheader)
 - Keys in `balcony_settings_view`: `ratedPower`, `batteryChargeLimit`, `batteryDischargeLimit` (20–100 %, Schritt 5), `batteryPriorityModeStatus`, `emCommStatus` (Smart-Meter-Schalter)
 - Stack-Geräte: `POST stacking/setProperty/{id}` mit `{"key","value"}`
 - Zeitpläne: `device/job/{add,edit,changeStatus/{id}}` (Felder u. a. `deviceJobId`, `serialNum`, `cycle`, `effectiveTime`, `modeValue`)
 - Smart Meter: `assist/setSmartMeterTypeAndAddress/{id}`
+
+### Bewertung der Schreib-Keys
+| Key | Entscheidung | Begründung |
+|---|---|---|
+| `ratedPower` | **nicht schreiben** | Bei `emCommStatus=1` regelt das Gerät den Wert selbst anhand des Smart Meters (Shelly); beobachtet: 150 W → 100 W ohne Eingriff. Nur lesen. |
+| `emCommStatus` | **nicht schreiben** | Smart-Meter-Schalter; Abschalten stört die Nulleinspeisung. Nur lesen. |
+| `batteryPriorityModeStatus` | in der App umstellen, API nur lesen | App-Auswahl: „Zuerst entladen" / „Energiespeicherung zuerst". Aktuell `0` = „Zuerst entladen"; `1` vermutlich „Energiespeicherung zuerst" (per App-Umschaltung und Probe-Lauf zu bestätigen). |
+| `batteryChargeLimit`, `batteryDischargeLimit` | per API möglich, **ungetestet** | Auswahl in der App jeweils 20–100 % in 5er-Schritten. Ob die Cloud/Firmware andere Werte annimmt, ist unbekannt (nur App-Werte verwenden). Die Probe kann sie per `--set` schreiben, wurde aber bewusst noch nicht gegen das Gerät genutzt. |
+
+### Schrittweiten
+- Lade-/Entladegrenze: Picker mit 20, 25, …, 100 (%).
+- Ausgangsleistung (`ratedPower`): Picker mit 50, 100, …, 800 (W), nur relevant ohne Smart Meter.
+- Dies sind die Werte der App-Oberfläche; ob der Server andere Zwischenwerte akzeptiert oder prüft, wurde nicht getestet.
