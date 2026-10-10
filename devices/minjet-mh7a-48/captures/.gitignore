@@ -1,0 +1,5 @@
+# Herstellerdateien nicht einchecken
+*.so
+*.apk
+*.apks
+*.zip

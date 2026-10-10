@@ -12,3 +12,23 @@ Ziel: Auslesen/Steuern des Akkus in Home Assistant.
 - App identifizieren (Name, Paket-ID, Version)
 - Traffic mitschneiden (HCI-Snoop / mitmproxy)
 - Protokoll dokumentieren → `docs/protocol.md`
+
+## Daten selbst extrahieren (Reproduktion)
+
+Das Repo enthält keine Herstellerdateien (APK, `libapp.so`), nur eigene Erkenntnisse. Wer die Daten nachvollziehen will, extrahiert sie aus der eigenen, rechtmäßig installierten App:
+
+1. APK vom eigenen Handy holen (Android, USB-Debugging an):
+   ```sh
+   adb shell pm path com.minjet.iot
+   adb pull <Pfad>/base.apk
+   adb pull <Pfad>/split_config.arm64_v8a.apk
+   ```
+2. `lib/arm64-v8a/libapp.so` und `libflutter.so` mit einem normalen `unzip` entpacken (nicht über Tools, die Binärdateien als Text behandeln, sonst ist die Datei beschädigt).
+3. Strings/Endpunkte lesen: `strings -n 6 libapp.so`
+4. Dart-AOT dekompilieren mit [blutter](https://github.com/worawit/blutter) (benötigt `cmake`, `ninja`, `clang`, `libicu-dev`, `libcapstone-dev`):
+   ```sh
+   python3 blutter.py <ordner_mit_libapp_und_libflutter> out
+   ```
+5. Optional: Live-Mitschnitt der eigenen Verbindung (mitmproxy / HAR-Export) zur Verifikation.
+
+Ergebnisse stehen in [docs/protocol.md](docs/protocol.md). Nur für Interoperabilität mit dem eigenen Gerät und privat gedacht; Zugangsdaten und Tokens gehören nie ins Repo.
