@@ -1,0 +1,37 @@
+name: Bug report
+description: Something does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please **do not** post your password, token or serial number. The integration's *diagnostics* download is already redacted.
+  - type: input
+    id: version
+    attributes:
+      label: Integration version
+      description: See HACS or `manifest.json`
+    validations:
+      required: true
+  - type: input
+    id: ha
+    attributes:
+      label: Home Assistant version
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Minjet device model
+      placeholder: MH7A-48
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / diagnostics
+      description: Debug logs for `custom_components.minjet` (remove tokens) and the diagnostics file.

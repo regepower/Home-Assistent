@@ -191,15 +191,49 @@ async def test_websocket_loop_reconnects_and_applies_push(
         await hass.config_entries.async_unload(mock_entry.entry_id)
 
 
-async def test_websocket_auth_error_starts_reauth(
+async def test_websocket_auth_error_relogs_in_without_reauth(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
 ) -> None:
-    """A rejected WebSocket token triggers reauth and ends the loop."""
+    """A rejected WebSocket token is renewed by a fresh login, no reauth prompt."""
+    calls = 0
 
     async def fake_ws(_api: Any, on_device: Any) -> None:
-        raise MinjetAuthError("rejected")
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise MinjetAuthError("token expired")
+        await asyncio.Event().wait()
+
+    with (
+        patch("custom_components.minjet.api.MinjetApi.async_run_websocket", fake_ws),
+        patch("custom_components.minjet.coordinator.asyncio.sleep", AsyncMock()),
+    ):
+        await _setup(hass, mock_entry)
+        for _ in range(10):
+            await hass.async_block_till_done()
+            if calls >= 2:
+                break
+        assert calls >= 2
+        assert not list(mock_entry.async_get_active_flows(hass, {"reauth"}))
+        logins = [c for c in mock_cloud.mock_calls if str(c[1]).endswith("/login")]
+        assert len(logins) >= 2  # initial login + renewal after the rejection
+        await hass.config_entries.async_unload(mock_entry.entry_id)
+
+
+async def test_websocket_auth_error_with_bad_credentials_starts_reauth(
+    hass: HomeAssistant,
+    mock_entry: MockConfigEntry,
+    mock_cloud: AiohttpClientMocker,
+) -> None:
+    """If the renewal login is rejected too, the user is asked to reauthenticate."""
+
+    async def fake_ws(_api: Any, on_device: Any) -> None:
+        # the password stops working between setup and the WebSocket rejection
+        mock_cloud.clear_requests()
+        mock_cloud.post(f"{BASE_URL}/login", json={"code": 500, "msg": "bad"})
+        raise MinjetAuthError("token expired")
 
     with patch("custom_components.minjet.api.MinjetApi.async_run_websocket", fake_ws):
         await _setup(hass, mock_entry)

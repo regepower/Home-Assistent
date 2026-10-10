@@ -63,10 +63,17 @@ class MinjetCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             try:
                 await self.api.async_run_websocket(self.async_handle_push)
             except MinjetAuthError:
-                _LOGGER.warning("Minjet websocket rejected, starting reauth")
-                assert self.config_entry is not None
-                self.config_entry.async_start_reauth(self.hass)
-                return
+                # Most likely an expired token: log in again; only if that fails
+                # too the credentials are wrong and the user has to reauthenticate.
+                try:
+                    await self.api.async_login()
+                except MinjetAuthError:
+                    _LOGGER.warning("Minjet login rejected, starting reauth")
+                    assert self.config_entry is not None
+                    self.config_entry.async_start_reauth(self.hass)
+                    return
+                except MinjetError as err:
+                    _LOGGER.debug("Minjet re-login failed: %s", err)
             except MinjetError as err:
                 _LOGGER.debug("Minjet websocket error: %s", err)
             if time.monotonic() - started > 60:

@@ -48,3 +48,10 @@ python3 tools/minjet_probe.py --out /tmp/minjet.json --ws 60
 - `--set KEY=VALUE`: **schreibt** einen Wert am Gerät (nur `batteryChargeLimit`, `batteryDischargeLimit`, `batteryPriorityModeStatus`), zeigt Wert vor/nach 5 s. **Ungetestet gegen das echte Gerät**; `ratedPower` und `emCommStatus` sind bewusst gesperrt
 - `--raw`: nicht maskieren (nur lokal ansehen, nie teilen)
 - Zugangsdaten nie ins Repo schreiben
+- Der GitHub-Workflow „Minjet probe" läuft **nur in privaten Repos** (Logs öffentlicher Repos sind für alle lesbar)
+
+## Rechtliches
+
+- Dieses Verzeichnis dokumentiert die Schnittstelle des **eigenen** Geräts zur Interoperabilität (Home Assistant).
+- Es sind keine Herstellerdateien (APK, Bibliotheken, dekompilierter Code) enthalten; `captures/` ignoriert Binärdateien per `.gitignore`.
+- Die Cloud-Schnittstelle ist inoffiziell und kann sich jederzeit ändern. Prüfe die Nutzungsbedingungen von Minjet für deinen Fall.

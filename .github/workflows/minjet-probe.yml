@@ -23,6 +23,8 @@ permissions:
 
 jobs:
   probe:
+    # Logs of public repositories are world-readable: only run in a private repo.
+    if: ${{ github.event.repository.private }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
