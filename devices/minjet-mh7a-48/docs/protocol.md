@@ -92,9 +92,9 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 - **Statistik-API liefert nur Nullen** (`queryDeviceStatistics` für Monat/Jahr/Lebensdauer: alle `used`/`generate` = 0.0, `queryPhotovoltaicPowerStatistics`: leer) → nicht nutzbar. Tages-/Monatswerte in HA aus den Gesamtzählern (`photovoltaicTotalGenerate`, `energyTotalUsed`) per `utility_meter` ableiten.
 - **Benachrichtigungen:** `app/notice/queryDeviceDetailNoticeList/{deviceId}` → `{total, rows:[{date, messages:[{appNoticeId, hasRead, time, title:"Warning message", message:"Niedrige SOC"}]}]}`; `app/notice/queryAppNoticeList` → `data.deviceList[].lastMessage/unReadMessageCount`; `queryUnreadMessageCount` → `data: <Zahl>`. Zeitstempel ohne Zeitzone (Server-Zeit), Zeitzone noch ungeklärt (App-Anzeige stimmt laut Nutzer nicht).
 
-## Schreibzugriffe (aus der App-Logik gelesen, NICHT getestet)
+## Schreibzugriffe
 
-> Status: **ungetestet**. Entscheidung: nicht schreiben, solange nicht nötig; Lesen reicht für HA. Die Hinweise unten dienen der Dokumentation.
+> Status: `batteryChargeLimit` **verifiziert** (siehe unten), alle anderen Keys ungetestet. Entscheidung: nur schreiben, wenn nötig; Lesen reicht für HA.
 - Balcony (MH7A): `POST photovoltaic/setRatedPower/{serialNum}` mit JSON `{"key": <Property>, "value": <Wert>}` (dio-Default, keine Sonderheader)
 - Keys in `balcony_settings_view`: `ratedPower`, `batteryChargeLimit`, `batteryDischargeLimit` (20–100 %, Schritt 5), `batteryPriorityModeStatus`, `emCommStatus` (Smart-Meter-Schalter)
 - Stack-Geräte: `POST stacking/setProperty/{id}` mit `{"key","value"}`
@@ -113,3 +113,10 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 - Lade-/Entladegrenze: Picker mit 20, 25, …, 100 (%).
 - Ausgangsleistung (`ratedPower`): Picker mit 50, 100, …, 800 (W), nur relevant ohne Smart Meter.
 - Dies sind die Werte der App-Oberfläche; ob der Server andere Zwischenwerte akzeptiert oder prüft, wurde nicht getestet.
+
+### Verifiziert: Schreiben von `batteryChargeLimit` (2026-10-10)
+- `POST photovoltaic/setRatedPower/{serialNum}` mit JSON `{"key":"batteryChargeLimit","value":99}` → `{"msg":"success","code":200,"data":99}`
+- 5 s später liefert `photovoltaic/queryPhotovoltaic/{serialNum}` `batteryChargeLimit: 99.0`, die App zeigt „Ladungsgrenze 99 %".
+- Damit nimmt die Cloud auch Werte **außerhalb des 5er-Rasters** der App an (99 statt 95/100). Die Firmware-Wirkung (Laden stoppt bei 99 %) wurde nicht gemessen.
+- Der Wert blieb nach dem Test auf 99 stehen (bewusst nicht automatisch zurückgesetzt).
+- `emFeedbackValue` (Smart-Meter-Wert) war in einem späteren Lauf negativ (−21,8 W, vorher +10,3 und +5,6 W) → vorzeichenbehaftet (vermutlich Einspeisung/Bezug).
