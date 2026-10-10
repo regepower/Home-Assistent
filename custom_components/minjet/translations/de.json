@@ -50,7 +50,7 @@
         "name": "Ausgangsleistung"
       },
       "smart_meter_power": {
-        "name": "Smart-Meter-Leistung"
+        "name": "Netzleistung (Smart Meter)"
       },
       "energy_generated": {
         "name": "Erzeugte Energie (gesamt)"

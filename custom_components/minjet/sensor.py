@@ -118,7 +118,6 @@ SENSORS: tuple[MinjetSensorDescription, ...] = (
         device_class=SensorDeviceClass.POWER,
         native_unit_of_measurement=UnitOfPower.WATT,
         state_class=SensorStateClass.MEASUREMENT,
-        entity_registry_enabled_default=False,
         value_fn=_prop("emFeedbackValue"),
     ),
     MinjetSensorDescription(

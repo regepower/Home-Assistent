@@ -106,7 +106,7 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 |---|---|---|
 | `ratedPower` | **nicht schreiben** | Bei `emCommStatus=1` regelt das Gerät den Wert selbst anhand des Smart Meters (Shelly); beobachtet: 150 W → 100 W ohne Eingriff. Nur lesen. |
 | `emCommStatus` | **nicht schreiben** | Smart-Meter-Schalter; Abschalten stört die Nulleinspeisung. Nur lesen. |
-| `batteryPriorityModeStatus` | in der App umstellen, API nur lesen | App-Auswahl: „Zuerst entladen" / „Energiespeicherung zuerst". Aktuell `0` = „Zuerst entladen"; `1` vermutlich „Energiespeicherung zuerst" (per App-Umschaltung und Probe-Lauf zu bestätigen). |
+| `batteryPriorityModeStatus` | in der App umstellen, API nur lesen | App-Auswahl: „Zuerst entladen" / „Energiespeicherung zuerst". Aktuell `0` = „Zuerst entladen"; `1` = „Energiespeicherung zuerst" (**bestätigt** per App-Umschaltung und Probe-Lauf am 2026-10-10). |
 | `batteryChargeLimit`, `batteryDischargeLimit` | per API möglich, **ungetestet** | Auswahl in der App jeweils 20–100 % in 5er-Schritten. Ob die Cloud/Firmware andere Werte annimmt, ist unbekannt (nur App-Werte verwenden). Die Probe kann sie per `--set` schreiben, wurde aber bewusst noch nicht gegen das Gerät genutzt. |
 
 ### Schrittweiten
@@ -120,3 +120,8 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 - Damit nimmt die Cloud auch Werte **außerhalb des 5er-Rasters** der App an (99 statt 95/100). Die Firmware-Wirkung (Laden stoppt bei 99 %) wurde nicht gemessen.
 - Der Wert blieb nach dem Test auf 99 stehen (bewusst nicht automatisch zurückgesetzt).
 - `emFeedbackValue` (Smart-Meter-Wert) war in einem späteren Lauf negativ (−21,8 W, vorher +10,3 und +5,6 W) → vorzeichenbehaftet (vermutlich Einspeisung/Bezug).
+
+### Bestätigte Zuordnungen (Lauf 2026-10-10 14:26 UTC)
+- `batteryPriorityModeStatus`: `0` = „Zuerst entladen", `1` = „Energiespeicherung zuerst" (App auf „Energiespeicherung zuerst" gestellt → API lieferte `1`). Im Modus 1 ging die gesamte PV-Leistung in die Batterie (`outputPower` 0 W, `batteryPower` = `photovoltaicPower` = 200,2 W, `batteryStatus` 1).
+- `emFeedbackValue` (Smart Meter): **positiv = Netzbezug, negativ = Einspeisung** (+121,7 W bei `outputPower` 0 und Hausverbrauch; −21,8 W bei 151,8 W Ausgang).
+- Priorität und Ladegrenze wirken in der App sofort sichtbar (Schreiben `batteryChargeLimit=99` → App „Ladungsgrenze 99 %").

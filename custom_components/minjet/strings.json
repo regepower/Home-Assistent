@@ -50,7 +50,7 @@
         "name": "Output power"
       },
       "smart_meter_power": {
-        "name": "Smart meter power"
+        "name": "Grid power (smart meter)"
       },
       "energy_generated": {
         "name": "Energy generated (total)"

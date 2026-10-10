@@ -11,7 +11,7 @@ Cloud-Anbindung für Minjet-Balkonspeicher (getestet mit **MH7A-48**). Rein lese
 2. „Minjet" installieren, Home Assistant neu starten.
 3. Einstellungen → Geräte & Dienste → *Integration hinzufügen* → „Minjet" → Login der Minjet-App (E-Mail/Passwort).
 
-**Entitäten pro Gerät:** Batterie (%), Batterieleistung (W, **+ = lädt, − = entlädt**), Batteriezustand, Solarleistung, Ausgangsleistung, Gesamt-Erzeugung/-Verbrauch (kWh, `total_increasing`, für Energie-Dashboard und `utility_meter`), Temperaturen, Zellspannungen, Lade-/Entladegrenze, Nennleistung, Prioritätsmodus, Online-Status, Smart-Meter-Verbindung. Standardmäßig deaktiviert: Smart-Meter-Leistung, WLAN-Signal.
+**Entitäten pro Gerät:** Batterie (%), Batterieleistung (W, **+ = lädt, − = entlädt**), Batteriezustand, Solarleistung, Ausgangsleistung, Gesamt-Erzeugung/-Verbrauch (kWh, `total_increasing`, für Energie-Dashboard und `utility_meter`), Temperaturen, Zellspannungen, Lade-/Entladegrenze, Nennleistung, Prioritätsmodus, Netzleistung (Smart Meter, **+ = Bezug, − = Einspeisung**), Online-Status, Smart-Meter-Verbindung. Standardmäßig deaktiviert: WLAN-Signal.
 
 **Hinweise**
 - Die „heute"-Felder der Cloud sind in Wahrheit Gesamtzähler; Tageswerte per `utility_meter` (daily/monthly) aus den Gesamt-Sensoren bilden.
