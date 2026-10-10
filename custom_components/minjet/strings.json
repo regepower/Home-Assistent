@@ -70,21 +70,11 @@
       "cell_voltage_max": {
         "name": "Highest cell voltage"
       },
-      "charge_limit": {
-        "name": "Charge limit"
-      },
       "discharge_limit": {
         "name": "Discharge limit"
       },
       "rated_power": {
         "name": "Rated power"
-      },
-      "priority_mode": {
-        "name": "Battery priority mode",
-        "state": {
-          "discharge_first": "Discharge first",
-          "storage_first": "Energy storage first"
-        }
       },
       "wifi_signal": {
         "name": "Wi-Fi signal"
@@ -97,6 +87,28 @@
       "smart_meter_connected": {
         "name": "Smart meter connected"
       }
+    },
+    "number": {
+      "charge_limit": {
+        "name": "Charge limit"
+      }
+    },
+    "select": {
+      "priority_mode": {
+        "name": "Battery priority mode",
+        "state": {
+          "discharge_first": "Discharge first",
+          "storage_first": "Energy storage first"
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "request_failed": {
+      "message": "The Minjet cloud rejected the request: {error}"
+    },
+    "charge_limit_too_low": {
+      "message": "The charge limit must be above the discharge limit ({discharge} %)."
     }
   }
 }

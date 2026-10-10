@@ -70,21 +70,11 @@
       "cell_voltage_max": {
         "name": "Höchste Zellspannung"
       },
-      "charge_limit": {
-        "name": "Ladegrenze"
-      },
       "discharge_limit": {
         "name": "Entladegrenze"
       },
       "rated_power": {
         "name": "Nennleistung"
-      },
-      "priority_mode": {
-        "name": "Batterie-Prioritätsmodus",
-        "state": {
-          "discharge_first": "Zuerst entladen",
-          "storage_first": "Energiespeicherung zuerst"
-        }
       },
       "wifi_signal": {
         "name": "WLAN-Signal"
@@ -97,6 +87,28 @@
       "smart_meter_connected": {
         "name": "Smart Meter verbunden"
       }
+    },
+    "number": {
+      "charge_limit": {
+        "name": "Ladegrenze"
+      }
+    },
+    "select": {
+      "priority_mode": {
+        "name": "Batterie-Prioritätsmodus",
+        "state": {
+          "discharge_first": "Zuerst entladen",
+          "storage_first": "Energiespeicherung zuerst"
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "request_failed": {
+      "message": "Die Minjet-Cloud hat die Anfrage abgelehnt: {error}"
+    },
+    "charge_limit_too_low": {
+      "message": "Die Ladegrenze muss über der Entladegrenze ({discharge} %) liegen."
     }
   }
 }

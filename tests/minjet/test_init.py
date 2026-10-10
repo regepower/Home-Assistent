@@ -52,7 +52,7 @@ async def test_setup_creates_entities(
     assert _state(hass, "sensor", "energy_generated").state == "402.1"
     assert _state(hass, "sensor", "energy_used").state == "353.8"
     assert float(_state(hass, "sensor", "cell_voltage_min").state) == 3.282
-    assert _state(hass, "sensor", "priority_mode").state == "discharge_first"
+    assert _state(hass, "select", "priority_mode").state == "discharge_first"
     assert _state(hass, "binary_sensor", "online").state == "on"
     assert _state(hass, "binary_sensor", "smart_meter_connected").state == "on"
 

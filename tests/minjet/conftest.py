@@ -63,11 +63,11 @@ def device() -> dict[str, Any]:
     return deepcopy(DEVICE)
 
 
-@pytest.fixture
-def mock_cloud(
+def register_cloud(
     aioclient_mock: AiohttpClientMocker, device: dict[str, Any]
 ) -> AiohttpClientMocker:
-    """Mock the Minjet REST endpoints."""
+    """(Re-)register the REST mocks; the JSON body is frozen at registration."""
+    aioclient_mock.clear_requests()
     aioclient_mock.post(
         f"{BASE_URL}/login", json={"code": 200, "msg": "success", "token": "tok"}
     )
@@ -76,6 +76,14 @@ def mock_cloud(
         json={"code": 200, "msg": "success", "data": [device]},
     )
     return aioclient_mock
+
+
+@pytest.fixture
+def mock_cloud(
+    aioclient_mock: AiohttpClientMocker, device: dict[str, Any]
+) -> AiohttpClientMocker:
+    """Mock the Minjet REST endpoints."""
+    return register_cloud(aioclient_mock, device)
 
 
 @pytest.fixture

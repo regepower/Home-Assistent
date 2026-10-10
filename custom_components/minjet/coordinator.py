@@ -8,7 +8,7 @@ import time
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import MinjetApi, MinjetAuthError, MinjetError
@@ -73,6 +73,26 @@ class MinjetCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
                 backoff = WS_BACKOFF_MIN
             await asyncio.sleep(backoff)
             backoff = min(backoff * 2, WS_BACKOFF_MAX)
+
+    async def async_set_property(self, serial: str, key: str, value: int) -> None:
+        """Write a property and update the local state optimistically.
+
+        The device applies the value asynchronously; the next push or poll
+        confirms it (or reverts the optimistic value if it was not applied).
+        """
+        try:
+            await self.api.async_set_property(serial, key, value)
+        except MinjetError as err:
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="request_failed",
+                translation_placeholders={"error": str(err)},
+            ) from err
+        data = dict(self.data)
+        device = dict(data[serial])
+        device["properties"] = {**(device.get("properties") or {}), key: value}
+        data[serial] = device
+        self.async_set_updated_data(data)
 
     def async_handle_push(self, device: dict[str, Any]) -> None:
         """Merge a pushed device object into the coordinator data."""

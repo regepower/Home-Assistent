@@ -9,7 +9,7 @@ from typing import Any
 
 import aiohttp
 
-from .const import BASE_URL, WS_RECEIVE_TIMEOUT, WS_URL
+from .const import BASE_URL, WRITABLE_KEYS, WS_RECEIVE_TIMEOUT, WS_URL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -71,6 +71,18 @@ class MinjetApi:
             for device in devices
             if isinstance(device, dict) and device.get("serialNum")
         }
+
+    async def async_set_property(self, serial: str, key: str, value: int) -> None:
+        """Write one device property (balcony storage: setRatedPower endpoint)."""
+        if key not in WRITABLE_KEYS:
+            raise ValueError(f"{key} is not a writable property")
+        data = await self._request(
+            "POST",
+            f"photovoltaic/setRatedPower/{serial}",
+            json_body={"key": key, "value": value},
+        )
+        if data.get("code") != 200:
+            raise MinjetConnectionError(str(data.get("msg") or "write rejected"))
 
     async def async_run_websocket(
         self, on_device: Callable[[dict[str, Any]], Awaitable[None] | None]

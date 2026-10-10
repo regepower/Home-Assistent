@@ -28,7 +28,6 @@ from . import MinjetConfigEntry
 from .entity import MinjetEntity
 
 BATTERY_STATES = {0: "idle", 1: "charging", 2: "discharging"}
-PRIORITY_MODES = {0: "discharge_first", 1: "storage_first"}
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -175,13 +174,6 @@ SENSORS: tuple[MinjetSensorDescription, ...] = (
         value_fn=_millivolt("cellVoltMax"),
     ),
     MinjetSensorDescription(
-        key="charge_limit",
-        translation_key="charge_limit",
-        native_unit_of_measurement=PERCENTAGE,
-        entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=_prop("batteryChargeLimit"),
-    ),
-    MinjetSensorDescription(
         key="discharge_limit",
         translation_key="discharge_limit",
         native_unit_of_measurement=PERCENTAGE,
@@ -195,14 +187,6 @@ SENSORS: tuple[MinjetSensorDescription, ...] = (
         native_unit_of_measurement=UnitOfPower.WATT,
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=_prop("ratedPower"),
-    ),
-    MinjetSensorDescription(
-        key="priority_mode",
-        translation_key="priority_mode",
-        device_class=SensorDeviceClass.ENUM,
-        options=list(PRIORITY_MODES.values()),
-        entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=_mapped("batteryPriorityModeStatus", PRIORITY_MODES),
     ),
     MinjetSensorDescription(
         key="wifi_signal",
