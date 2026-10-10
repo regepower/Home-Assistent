@@ -129,3 +129,8 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 ### Verifiziert: Zurücksetzen und Modus schreiben (2026-10-10 14:28 UTC)
 - `batteryChargeLimit` 99 → 100: HTTP 200, `data: 100`, danach `100.0`.
 - `batteryPriorityModeStatus` 1 → 0 („Zuerst entladen"): HTTP 200, `data: 0`, nach 5 s `0`. Gleicher Endpunkt/Body wie bei der Ladegrenze (`photovoltaic/setRatedPower/{serialNum}`, `{"key","value"}`).
+
+### App-Verhalten: Limits nur im Modus „Energiespeicherung zuerst"
+- Beobachtung (Nutzer, 2026-10-10): Steht der Prioritätsmodus auf „Zuerst entladen" (`batteryPriorityModeStatus = 0`), blendet die App die Felder **Ladungsgrenze** und **Entladungsgrenze** aus; im Modus „Energiespeicherung zuerst" (`1`) erscheinen sie (z. B. 99 % / 20 %).
+- Folgerung: Die Limits sind nur im Modus 1 relevant. Ob die Cloud/Firmware Limit-Schreibzugriffe im Modus 0 annimmt oder ignoriert, ist **ungetestet**. Die Werte `batteryChargeLimit`/`batteryDischargeLimit` bleiben in `properties` auch im Modus 0 sichtbar (z. B. 100/20).
+- Für HA: falls später `number`-Entitäten für die Limits ergänzt werden, nur im Modus 1 anbieten bzw. im Modus 0 als nicht verfügbar markieren.
