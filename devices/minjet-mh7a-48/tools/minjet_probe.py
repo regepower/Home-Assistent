@@ -165,6 +165,51 @@ def ws_listen(token, seconds, raw, host=WS_HOST, port=443, tls=True):
         sock.close()
 
 
+WRITABLE_KEYS = {
+    "batteryChargeLimit",
+    "batteryDischargeLimit",
+    "batteryPriorityModeStatus",
+    "emCommStatus",
+    "ratedPower",
+}
+
+
+def parse_value(text):
+    for conv in (int, float):
+        try:
+            return conv(text)
+        except ValueError:
+            continue
+    return text
+
+
+def read_property(token, serial, key, base):
+    _, data = request(
+        f"photovoltaic/queryPhotovoltaic/{serial}", token=token, base=base
+    )
+    props = ((data.get("data") if isinstance(data, dict) else None) or {}).get(
+        "properties"
+    ) or {}
+    return props.get(key)
+
+
+def set_property(token, serial, key, value, base, raw):
+    """Einzelnen Gerätewert setzen (Balcony: photovoltaic/setRatedPower/{SN})."""
+    before = read_property(token, serial, key, base)
+    print(f"\n=== SET {key}: {before!r} -> {value!r}")
+    status, data = request(
+        f"photovoltaic/setRatedPower/{serial}",
+        "POST",
+        token=token,
+        base=base,
+        body={"key": key, "value": value},
+    )
+    show("setRatedPower", status, data, raw)
+    time.sleep(5)
+    after = read_property(token, serial, key, base)
+    print(f"Wert danach (nach 5 s): {after!r}")
+
+
 def probe_extra(token, devices, base, raw, results):
     """Statistik- und Benachrichtigungsaufrufe der App (nur lesend)."""
     try:
@@ -230,6 +275,11 @@ def main():
         action="store_true",
         help="zusätzlich Statistik (Tag/Monat/Jahr) und Benachrichtigungen abrufen",
     )
+    ap.add_argument(
+        "--set",
+        metavar="KEY=VALUE",
+        help="Gerätewert schreiben (nur: " + ", ".join(sorted(WRITABLE_KEYS)) + ")",
+    )
     ap.add_argument("--base", default=BASE, help="API-Basis (Standard: Minjet-Cloud)")
     ap.add_argument("--out", help="Ausgabe zusätzlich als JSON in Datei schreiben")
     args = ap.parse_args()
@@ -279,6 +329,17 @@ def main():
 
     if args.extra:
         probe_extra(token, devices, args.base, args.raw, results)
+
+    if args.set:
+        key, _, text = args.set.partition("=")
+        if key not in WRITABLE_KEYS or not text:
+            print(f"--set: Key nicht erlaubt/leer: {key!r}")
+            return 2
+        serial = next((d.get("serialNum") for d in devices if d.get("serialNum")), None)
+        if not serial:
+            print("--set: keine Seriennummer gefunden")
+            return 2
+        set_property(token, serial, key, parse_value(text), args.base, args.raw)
 
     if args.out:
         with open(args.out, "w", encoding="utf-8") as fh:

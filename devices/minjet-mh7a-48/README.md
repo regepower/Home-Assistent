@@ -44,5 +44,7 @@ python3 tools/minjet_probe.py --out /tmp/minjet.json --ws 60
 ```
 
 - `--ws SEK`: WebSocket zusätzlich SEK Sekunden mitschneiden
+- `--extra`: zusätzlich Statistik und Benachrichtigungen abrufen
+- `--set KEY=VALUE`: **schreibt** einen Wert am Gerät (nur `batteryChargeLimit`, `batteryDischargeLimit`, `batteryPriorityModeStatus`, `emCommStatus`, `ratedPower`); zeigt Wert vor/nach 5 s. Erster Test ohne Änderung: aktuellen Wert erneut setzen, z. B. `batteryChargeLimit=100`
 - `--raw`: nicht maskieren (nur lokal ansehen, nie teilen)
 - Zugangsdaten nie ins Repo schreiben

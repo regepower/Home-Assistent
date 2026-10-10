@@ -13,6 +13,10 @@ on:
         description: "Statistik und Benachrichtigungen abrufen (true/false)"
         required: false
         default: "true"
+      set_value:
+        description: "SCHREIBEN, z. B. batteryChargeLimit=100 (leer = nur lesen)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -32,8 +36,10 @@ jobs:
           MINJET_PASS: ${{ secrets.MINJET_PASS }}
           WS_SECONDS: ${{ inputs.ws_seconds }}
           EXTRA: ${{ inputs.extra }}
+          SET_VALUE: ${{ inputs.set_value }}
         run: |
           args=()
           if [ "${WS_SECONDS:-0}" -gt 0 ]; then args+=(--ws "$WS_SECONDS"); fi
           if [ "${EXTRA:-false}" = "true" ]; then args+=(--extra); fi
+          if [ -n "${SET_VALUE:-}" ]; then args+=(--set "$SET_VALUE"); fi
           python3 devices/minjet-mh7a-48/tools/minjet_probe.py "${args[@]}"
