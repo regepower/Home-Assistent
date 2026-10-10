@@ -11,6 +11,7 @@ werden. Mit --raw wird nichts maskiert (nur lokal ansehen!).
 
 import argparse
 import base64
+import datetime
 import getpass
 import json
 import os
@@ -21,6 +22,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+import zoneinfo
 
 BASE = "https://app.minjet-energy.com/prod-api"
 WS_HOST = "app.minjet-energy.com"
@@ -163,11 +165,70 @@ def ws_listen(token, seconds, raw, host=WS_HOST, port=443, tls=True):
         sock.close()
 
 
+def probe_extra(token, devices, base, raw, results):
+    """Statistik- und Benachrichtigungsaufrufe der App (nur lesend)."""
+    try:
+        tz = zoneinfo.ZoneInfo("Europe/Berlin")
+    except zoneinfo.ZoneInfoNotFoundError:
+        tz = datetime.timezone.utc
+    today = datetime.datetime.now(tz).date()
+    ranges = {
+        "month": (today.replace(day=1), 1),
+        "year": (today.replace(month=1, day=1), 2),
+        "lifetime": (datetime.date(2023, 1, 1), 3),
+    }
+    for dev in devices[:1]:
+        serial = dev.get("serialNum")
+        if serial:
+            # Die App nutzt dateType 1=Monat, 2=Jahr, 3=Lebensdauer
+            for name, (start, date_type) in ranges.items():
+                params = {
+                    "serialNum": serial,
+                    "startDate": start.isoformat(),
+                    "endDate": today.isoformat(),
+                    "dateType": date_type,
+                }
+                status, data = request(
+                    "deviceReport/queryDeviceStatistics",
+                    token=token,
+                    base=base,
+                    params=params,
+                )
+                show(f"queryDeviceStatistics [{name}]", status, data, raw)
+                results[f"stats_{name}"] = data
+            status, data = request(
+                "deviceReport/queryPhotovoltaicPowerStatistics",
+                token=token,
+                base=base,
+                params={"serialNum": serial, "dateTime": today.isoformat()},
+            )
+            show("queryPhotovoltaicPowerStatistics [heute]", status, data, raw)
+            results["pv_power_today"] = data
+        dev_id = dev.get("deviceId")
+        if dev_id is not None:
+            status, data = request(
+                f"app/notice/queryDeviceDetailNoticeList/{dev_id}",
+                token=token,
+                base=base,
+            )
+            show("queryDeviceDetailNoticeList", status, data, raw)
+            results["device_notices"] = data
+    for path in ("app/notice/queryAppNoticeList", "app/notice/queryUnreadMessageCount"):
+        status, data = request(path, token=token, base=base)
+        show(path, status, data, raw)
+        results[path] = data
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--raw", action="store_true", help="nichts maskieren")
     ap.add_argument(
         "--ws", type=int, metavar="SEK", help="WebSocket SEK Sekunden mitschneiden"
+    )
+    ap.add_argument(
+        "--extra",
+        action="store_true",
+        help="zusätzlich Statistik (Tag/Monat/Jahr) und Benachrichtigungen abrufen",
     )
     ap.add_argument("--base", default=BASE, help="API-Basis (Standard: Minjet-Cloud)")
     ap.add_argument("--out", help="Ausgabe zusätzlich als JSON in Datei schreiben")
@@ -215,6 +276,9 @@ def main():
                 args.raw,
             )
             results[f"pv_{ident_key}"] = detail
+
+    if args.extra:
+        probe_extra(token, devices, args.base, args.raw, results)
 
     if args.out:
         with open(args.out, "w", encoding="utf-8") as fh:

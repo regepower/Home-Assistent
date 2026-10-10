@@ -79,3 +79,10 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 2. Schreibaufrufe (`setProperty`) einzeln testen, z. B. Buzzer oder Limit
 3. Home-Assistant-Integration (Custom Component): Login, Polling/WS, Switches/Numbers per `setProperty`
 4. Rate-Limits/ToS der Cloud beachten; Polling zurückhaltend wählen
+
+## Tages-/Monatswerte und Benachrichtigungen (aus der App-Logik, noch ungetestet)
+- Live-API liefert `photovoltaicTodayGenerate` = `photovoltaicMonthGenerate` = `photovoltaicTotalGenerate` (402.1) sowie `photovoltaicTodayUsed` = `energyTotalUsed` (353.8): die „heute"-Felder sind faktisch **Gesamtzähler** (App zeigt deshalb „Heute erzeugt" falsch).
+- `GET deviceReport/queryDeviceStatistics?serialNum=<SN>&startDate=yyyy-MM-dd&endDate=yyyy-MM-dd&dateType=<1|2|3>` (1 = Monat, 2 = Jahr, 3 = Lebensdauer); Antwort `data.list`, `data.totalGenerate`, `data.totalUsed`
+- `GET deviceReport/queryPhotovoltaicPowerStatistics?serialNum=<SN>&dateTime=yyyy-MM-dd` (Leistungsverlauf eines Tages)
+- Benachrichtigungen: `GET app/notice/queryAppNoticeList`, `GET app/notice/queryUnreadMessageCount`, `GET app/notice/queryDeviceDetailNoticeList/{deviceId}`; `app/notice/read` markiert gelesen (schreibend, nicht getestet)
+- HA-Plan für Tageswerte: Gesamtzähler als `total_increasing`-Sensoren und per `utility_meter` (daily/monthly) ableiten; optional zusätzlich die Cloud-Statistik

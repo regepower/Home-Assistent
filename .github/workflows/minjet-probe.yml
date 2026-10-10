@@ -9,6 +9,10 @@ on:
         description: "WebSocket-Mitschnitt in Sekunden (0 = aus)"
         required: false
         default: "0"
+      extra:
+        description: "Statistik und Benachrichtigungen abrufen (true/false)"
+        required: false
+        default: "true"
 
 permissions:
   contents: read
@@ -27,7 +31,9 @@ jobs:
           MINJET_USER: ${{ secrets.MINJET_USER }}
           MINJET_PASS: ${{ secrets.MINJET_PASS }}
           WS_SECONDS: ${{ inputs.ws_seconds }}
+          EXTRA: ${{ inputs.extra }}
         run: |
           args=()
           if [ "${WS_SECONDS:-0}" -gt 0 ]; then args+=(--ws "$WS_SECONDS"); fi
+          if [ "${EXTRA:-false}" = "true" ]; then args+=(--extra); fi
           python3 devices/minjet-mh7a-48/tools/minjet_probe.py "${args[@]}"
