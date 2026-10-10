@@ -86,3 +86,15 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 - `GET deviceReport/queryPhotovoltaicPowerStatistics?serialNum=<SN>&dateTime=yyyy-MM-dd` (Leistungsverlauf eines Tages)
 - Benachrichtigungen: `GET app/notice/queryAppNoticeList`, `GET app/notice/queryUnreadMessageCount`, `GET app/notice/queryDeviceDetailNoticeList/{deviceId}`; `app/notice/read` markiert gelesen (schreibend, nicht getestet)
 - HA-Plan für Tageswerte: Gesamtzähler als `total_increasing`-Sensoren und per `utility_meter` (daily/monthly) ableiten; optional zusätzlich die Cloud-Statistik
+
+## Live-Ergebnisse Lauf 2 (2026-10-10)
+- **WebSocket funktioniert** über `wss://app.minjet-energy.com/ws/device?token=<token>` (Port 80 → 301). Ohne Subscribe-Nachricht kommt zuerst `{"msg":"success"}`, danach ca. 1 Nachricht/s: `{"msg":"success","data":{<Geräteobjekt inkl. properties>},"type":"detail"}`. Solange die App/WS offen ist, steht `uploadCycle` auf 2 s (sonst 60 s) → quasi Echtzeit für HA.
+- **Statistik-API liefert nur Nullen** (`queryDeviceStatistics` für Monat/Jahr/Lebensdauer: alle `used`/`generate` = 0.0, `queryPhotovoltaicPowerStatistics`: leer) → nicht nutzbar. Tages-/Monatswerte in HA aus den Gesamtzählern (`photovoltaicTotalGenerate`, `energyTotalUsed`) per `utility_meter` ableiten.
+- **Benachrichtigungen:** `app/notice/queryDeviceDetailNoticeList/{deviceId}` → `{total, rows:[{date, messages:[{appNoticeId, hasRead, time, title:"Warning message", message:"Niedrige SOC"}]}]}`; `app/notice/queryAppNoticeList` → `data.deviceList[].lastMessage/unReadMessageCount`; `queryUnreadMessageCount` → `data: <Zahl>`. Zeitstempel ohne Zeitzone (Server-Zeit), Zeitzone noch ungeklärt (App-Anzeige stimmt laut Nutzer nicht).
+
+## Schreibzugriffe (aus der App-Logik gelesen, NICHT getestet)
+- Balcony (MH7A): `POST photovoltaic/setRatedPower/{serialNum}` mit JSON `{"key": <Property>, "value": <Wert>}` (dio-Default, keine Sonderheader)
+- Keys in `balcony_settings_view`: `ratedPower`, `batteryChargeLimit`, `batteryDischargeLimit` (20–100 %, Schritt 5), `batteryPriorityModeStatus`, `emCommStatus` (Smart-Meter-Schalter)
+- Stack-Geräte: `POST stacking/setProperty/{id}` mit `{"key","value"}`
+- Zeitpläne: `device/job/{add,edit,changeStatus/{id}}` (Felder u. a. `deviceJobId`, `serialNum`, `cycle`, `effectiveTime`, `modeValue`)
+- Smart Meter: `assist/setSmartMeterTypeAndAddress/{id}`
