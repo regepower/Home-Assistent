@@ -1,35 +1,55 @@
 # Protokoll (Findings)
 
-Quelle: Strings aus `libapp.so` der APK v2.0.2(19) (apktool-Export in `captures/`). Alles ungeprüft, nur statisch ermittelt.
+Quelle: blutter-Dekompilierung von `libapp.so` + `libflutter.so` (Minjet Android, Flutter/Dart 3.x, passende Paarung aus derselben APK-Version). Nur statisch ermittelt, noch nicht gegen die Cloud getestet.
 
 ## App
-- Flutter (Dart AOT) → Logik in `lib/arm64-v8a/libapp.so`, kein Java/Smali-Code der App-Logik
-- Dart-Package `minjet`: `utils/http_api.dart`, `utils/socket.dart`, `providers/device_provider.dart`
-- Plugins: `flutter_blue_plus` (BLE), `wifi_scan`, `dio`, `web_socket_channel`, `crclib` (Crc16Modbus), Firebase Push
-- Seiten: balcony_* (Balkonspeicher), stack_* (Stack), smart_meter, wifi_set / reset_wifi (WLAN-Provisionierung per BLE)
+- Flutter (Dart AOT), Package `minjet`; relevante Dateien: `utils/http_api.dart`, `utils/socket.dart`, `providers/model/device_model.dart`, `page/{balcony,stack}_*_view.dart`
+- Die App kennt zwei Gerätefamilien: **Balcony** (Balkonspeicher) und **Stack**. MH7A-48 steht als Produktname in `device_model.dart`.
 
-## Cloud
-- REST: `https://app.minjet-energy.com/prod-api` (Bearer-Token, Header `Authorization`)
-- WebSocket: `ws://app.minjet-energy.com/ws/device?token=<token>` (vermutlich Live-Daten)
-- Endpunkte (Pfad relativ zu `/prod-api`):
-  - `device/queryUserDeviceList`, `device/bindDevice`, `device/unBindDevice`, `device/productList`, `device/queryProductPictures`
-  - `device/updateDeviceNickName/{id}`, `device/queryDeviceLastVersion/{id}`, `device/firmwareUpgrade/…`
-  - `device/job/{list,add,edit,changeStatus/{id},zoneIdList}` (Zeitpläne)
-  - `assist/queryInverterList`, `assist/querySmartMeterList`
-  - `app/notice/{queryAppNoticeList,queryUnreadMessageCount,read}`
-  - `system/user/profile/{updateNickName,updatePwd,updateUserTimeZone,avatar}`
-- Login-/Datenpfade noch nicht gefunden (nur Teilstrings sichtbar)
+## Cloud-REST
+- Basis: `https://app.minjet-energy.com/prod-api` (RuoYi-Framework)
+- Auth: Header `Authorization: Bearer <token>`
+- Standardantwort: `{ "code": 200, "msg": "...", ... }` (`code`/`msg`/`rows`/`data`)
 
-## BLE (flutter_blue_plus)
-- GATT-UUIDs im Binary: `0000A002-…`, `0000c304-…`, `0000c305-…` (jeweils `-0000-1000-8000-00805f9b34fb`), `00002902` (CCCD)
-- Frame-Prüfsumme vermutlich CRC16-Modbus
+### Login
+- `POST /login` mit Body `{ "username": "...", "password": "..." }` (Dart-Map, vermutlich JSON via dio; kein Captcha/uuid)
+- Antwort: `code`, `token`
+- Danach `getInfo` (User: `userName`, `nickName`, `email`, `avatar`, `timeZone`)
 
-## Nächste Schritte
-1. Dart-AOT dekompilieren (blutter / reFlutter) → Request-/Frame-Strukturen, Login-Pfad
-2. Live-Mitschnitt: mitmproxy (REST, WS) und HCI-Snoop (BLE); Zertifikats-Pinning prüfen
-3. Entscheiden: lokal (BLE) vs. Cloud-Polling für HA
+### Endpunkte (relativ zu `/prod-api`)
+| Zweck | Pfad |
+|---|---|
+| Geräteliste | `device/queryUserDeviceList` |
+| Binden / Lösen | `device/bindDevice`, `device/unBindDevice` |
+| Produktliste/Bilder | `device/productList`, `device/queryProductPictures` |
+| Umbenennen | `device/updateDeviceNickName/{id}` |
+| Firmware | `device/queryDeviceLastVersion/{id}`, `device/firmwareUpgrade/{id}`, `device/firmwareUpgradeProgressBar/{id}` |
+| Zeitpläne | `device/job/{list,add,edit,changeStatus/{id},zoneIdList}` |
+| **Steuern** | `POST stacking/setProperty/{id}` mit Body `{ "key": <Property>, "value": <Wert> }` |
+| PV / Balcony | `photovoltaic/queryPhotovoltaic/{id}`, `photovoltaic/setRatedPower/{id}`, `photovoltaic/closeRealTimeStatus/{id}` |
+| Statistik | `deviceReport/queryDeviceStatistics`, `deviceReport/queryPhotovoltaicPowerStatistics` (Parameter u. a. `dateType`, `startDate`, `endDate`, `dateTime`, `serialNum`) |
+| Wechselrichter / Zähler | `assist/queryInverterList`, `assist/querySmartMeterList`, `assist/setSmartMeterTypeAndAddress/{id}` |
+| Benachrichtigungen | `app/notice/{queryAppNoticeList,queryUnreadMessageCount,read,queryDeviceDetailNoticeList/{id}}` |
+| Profil | `system/user/profile/{updateNickName,updatePwd,updateUserTimeZone,avatar}` |
 
-## Hinweis: `libapp.so` im ZIP ist defekt
-- Der apktool-M-Export hat die Binärdatei als UTF-8-Text behandelt (~4,8 Mio. Bytes zu `EF BF BD` ersetzt, ELF-Header kaputt) → blutter bricht ab, Original nicht rekonstruierbar.
-- `libflutter.so` ist intakt, die Strings oben stammen aus der noch lesbaren Datei und sind daher nur teilweise vollständig.
-- Benötigt: originale APK bzw. unveränderte `libapp.so` (arm64) → siehe `captures/`.
+Ob `{id}` die `deviceId` oder `serialNum` ist, ist noch offen (Call-Site baut den Pfad per String-Interpolation).
+
+## Geräteobjekt (`device_model.dart`)
+- Stammdaten: `deviceId`, `deviceName`, `customName`, `serialNum`, `macAddress`, `productKey`, `productCode`, `productName`, `bindTime`, `activeTime`, `deviceCurrentVersion`, `deviceLatestVersion`
+- Messwerte: `batteryPercentage`, `batteryPower`, `batteryStatus`, `ACInputPower`, `ACDCOutputPower`, `outputPower`, `PVInputPower`, `photovoltaicPower`, `onGridPower`, `chargePower`, `temperature`/`temperature1`/`temperature2`, `energyTotalUsed`, `photovoltaic{Today,Month,Total}{Generate,Used}`, `mpptInfo`
+- Schalter/Einstellungen (setProperty-Keys): `ACSwitchStatus`, `DCSwitchStatus`, `USBSwitchStatus`, `BuzzerSwitchStatus`, `childLockStatus`, `onGridModeStatus`, `antiIslandingProtectionModeStatus`, `batteryPriorityModeStatus`, `maxOnGridPower`, `maxAntiIslandingProtectionPower`, `batteryChargeLimit`, `batteryDischargeLimit`, `standByTime`, `chargePower`, `customName`
+- Weiteres: `parallelMachine`, `parallelFlagStatus`, `emType`/`emName`/`emCommStatus`/`emConfigStatus` (Energy Meter), `ratedPower`
+
+## WebSocket
+- `ws://app.minjet-energy.com/ws/device?token=<token>` (unverschlüsselt!)
+- Wrapper `Socket` mit Reconnect (max. Versuche); Nachrichtenformat noch nicht ausgelesen → per Mitschnitt klären
+
+## BLE (nur Erstinbetriebnahme/WLAN-Setup)
+- UUIDs `…A002`, `…c304`, `…c305` (Basis `-0000-1000-8000-00805f9b34fb`), CCCD `2902`; Prüfsumme CRC16-Modbus
+- Für HA nicht nötig, da Betrieb über Cloud/WLAN
+
+## Offen
+1. Pfad-Parameter `{id}` (deviceId vs. serialNum) und Antwortformat von `queryUserDeviceList` per Live-Test mit eigenem Account prüfen
+2. WebSocket-Nachrichten mitschneiden
+3. Home-Assistant-Integration (Custom Component): Login, Polling/WS, Switches/Numbers per `setProperty`
+4. Rate-Limits/ToS der Cloud beachten; Polling zurückhaltend wählen
