@@ -1,0 +1,33 @@
+name: Minjet probe
+
+# Manuell startbar (GitHub-App: Actions -> Minjet probe -> Run workflow).
+# Benötigt die Repository-Secrets MINJET_USER und MINJET_PASS.
+on:
+  workflow_dispatch:
+    inputs:
+      ws_seconds:
+        description: "WebSocket-Mitschnitt in Sekunden (0 = aus)"
+        required: false
+        default: "0"
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run probe (maskierte Ausgabe)
+        env:
+          MINJET_USER: ${{ secrets.MINJET_USER }}
+          MINJET_PASS: ${{ secrets.MINJET_PASS }}
+          WS_SECONDS: ${{ inputs.ws_seconds }}
+        run: |
+          args=()
+          if [ "${WS_SECONDS:-0}" -gt 0 ]; then args+=(--ws "$WS_SECONDS"); fi
+          python3 devices/minjet-mh7a-48/tools/minjet_probe.py "${args[@]}"
