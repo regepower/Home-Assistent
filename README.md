@@ -1,7 +1,7 @@
 # Minjet for Home Assistant
 
-[![Tests](https://github.com/regepower/Home-Assistent/actions/workflows/tests.yml/badge.svg)](https://github.com/regepower/Home-Assistent/actions/workflows/tests.yml)
-[![Validate](https://github.com/regepower/Home-Assistent/actions/workflows/validate.yml/badge.svg)](https://github.com/regepower/Home-Assistent/actions/workflows/validate.yml)
+[![Tests](https://github.com/regepower/Minjet/actions/workflows/tests.yml/badge.svg)](https://github.com/regepower/Minjet/actions/workflows/tests.yml)
+[![Validate](https://github.com/regepower/Minjet/actions/workflows/validate.yml/badge.svg)](https://github.com/regepower/Minjet/actions/workflows/validate.yml)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 
 Custom integration for **Minjet balcony storage batteries** (developed against the **MH7A-48**). It talks to the same cloud as the official Minjet app and delivers live data via WebSocket (`cloud_push`), with a 60 s REST poll as fallback.
@@ -10,7 +10,7 @@ Custom integration for **Minjet balcony storage batteries** (developed against t
 
 > **Unofficial.** This project is not affiliated with, endorsed by or supported by Minjet. The cloud interface was reverse engineered for interoperability with your own device and may change or break at any time. Use at your own risk.
 
-[![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=regepower&repository=Home-Assistent&category=integration)
+[![Open your Home Assistant instance and open this repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=regepower&repository=Minjet&category=integration)
 
 ## Features
 
@@ -29,7 +29,7 @@ Custom integration for **Minjet balcony storage batteries** (developed against t
 
 ### HACS (recommended)
 
-1. HACS → ⋮ → *Custom repositories* → add `https://github.com/regepower/Home-Assistent`, category **Integration** (or use the button above).
+1. HACS → ⋮ → *Custom repositories* → add `https://github.com/regepower/Minjet`, category **Integration** (or use the button above).
 2. Install **Minjet** and restart Home Assistant.
 3. *Settings → Devices & services → Add integration → Minjet* and log in with your Minjet app credentials.
 
@@ -87,7 +87,7 @@ Use *Energy generated (total)* as the solar production source in the Energy dash
 - Fallback: the device list is polled every 60 s; if the WebSocket drops it reconnects with back-off.
 - Writes: a single REST call per change; the new value is shown immediately and confirmed by the next update.
 
-Details of the reverse engineering are in [`devices/minjet-mh7a-48`](devices/minjet-mh7a-48).
+Details of the reverse engineering are in [`docs/`](docs).
 
 ## Troubleshooting
 
@@ -113,7 +113,7 @@ ruff check . && ruff format --check .
 pytest
 ```
 
-The repository also contains research notes and a small read-only probe script for the Minjet cloud, see [`devices/minjet-mh7a-48`](devices/minjet-mh7a-48). No vendor files are included.
+The repository also contains research notes and a small read-only probe script for the Minjet cloud, see [`docs/`](docs). No vendor files are included.
 
 ## License
 

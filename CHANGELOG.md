@@ -3,6 +3,7 @@
 ## 0.2.1
 - Fix: an expired token on the WebSocket is renewed with a fresh login instead of immediately asking for reauthentication.
 - Added brand icon, license, English and German documentation.
+- Repository is now Minjet-only: research notes moved to `docs/`, probe script to `tools/`.
 
 ## 0.2.0
 - New `select`: battery priority mode (discharge first / energy storage first).

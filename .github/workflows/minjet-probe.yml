@@ -44,4 +44,4 @@ jobs:
           if [ "${WS_SECONDS:-0}" -gt 0 ]; then args+=(--ws "$WS_SECONDS"); fi
           if [ "${EXTRA:-false}" = "true" ]; then args+=(--extra); fi
           if [ -n "${SET_VALUE:-}" ]; then args+=(--set "$SET_VALUE"); fi
-          python3 devices/minjet-mh7a-48/tools/minjet_probe.py "${args[@]}"
+          python3 tools/minjet_probe.py "${args[@]}"

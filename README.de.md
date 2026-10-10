@@ -6,7 +6,7 @@ Custom Integration für **Minjet-Balkonspeicher** (entwickelt gegen den **MH7A-4
 
 > **Inoffiziell.** Dieses Projekt steht in keiner Verbindung zu Minjet und wird nicht von Minjet unterstützt. Die Cloud-Schnittstelle wurde zur Interoperabilität mit dem eigenen Gerät per Reverse Engineering ermittelt und kann sich jederzeit ändern. Nutzung auf eigene Gefahr.
 
-[![Dieses Repository im HACS öffnen.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=regepower&repository=Home-Assistent&category=integration)
+[![Dieses Repository im HACS öffnen.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=regepower&repository=Minjet&category=integration)
 
 ## Funktionen
 
@@ -25,7 +25,7 @@ Custom Integration für **Minjet-Balkonspeicher** (entwickelt gegen den **MH7A-4
 
 ### HACS (empfohlen)
 
-1. HACS → ⋮ → *Benutzerdefinierte Repositories* → `https://github.com/regepower/Home-Assistent`, Kategorie **Integration** (oder den Button oben nutzen).
+1. HACS → ⋮ → *Benutzerdefinierte Repositories* → `https://github.com/regepower/Minjet`, Kategorie **Integration** (oder den Button oben nutzen).
 2. **Minjet** installieren und Home Assistant neu starten.
 3. *Einstellungen → Geräte & Dienste → Integration hinzufügen → Minjet* und mit den Zugangsdaten der Minjet-App anmelden.
 
@@ -99,7 +99,7 @@ ruff check . && ruff format --check .
 pytest
 ```
 
-Das Repository enthält außerdem Recherche-Notizen und ein kleines, nur lesendes Prüfskript für die Minjet-Cloud, siehe [`devices/minjet-mh7a-48`](devices/minjet-mh7a-48). Herstellerdateien sind nicht enthalten.
+Das Repository enthält außerdem Recherche-Notizen und ein kleines, nur lesendes Prüfskript für die Minjet-Cloud, siehe [`docs/`](docs). Herstellerdateien sind nicht enthalten.
 
 ## Lizenz
 

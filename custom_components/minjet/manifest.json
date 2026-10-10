@@ -5,10 +5,10 @@
     "@regepower"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/regepower/Home-Assistent",
+  "documentation": "https://github.com/regepower/Minjet",
   "integration_type": "hub",
   "iot_class": "cloud_push",
-  "issue_tracker": "https://github.com/regepower/Home-Assistent/issues",
+  "issue_tracker": "https://github.com/regepower/Minjet/issues",
   "requirements": [],
   "version": "0.2.1"
 }

@@ -3,3 +3,8 @@ __pycache__/
 .coverage
 .pytest_cache/
 .ruff_cache/
+# Herstellerdateien nie einchecken
+captures/
+*.apk
+*.apks
+*.so
