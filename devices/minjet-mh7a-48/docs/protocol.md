@@ -94,7 +94,7 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 
 ## Schreibzugriffe
 
-> Status: `batteryChargeLimit` **verifiziert** (siehe unten), alle anderen Keys ungetestet. Entscheidung: nur schreiben, wenn nötig; Lesen reicht für HA.
+> Status: `batteryChargeLimit` und `batteryPriorityModeStatus` **verifiziert** (siehe unten), `batteryDischargeLimit` nur gleicher Pfad, `ratedPower`/`emCommStatus` bewusst nicht getestet. Entscheidung: nur schreiben, wenn nötig; Lesen reicht für HA.
 - Balcony (MH7A): `POST photovoltaic/setRatedPower/{serialNum}` mit JSON `{"key": <Property>, "value": <Wert>}` (dio-Default, keine Sonderheader)
 - Keys in `balcony_settings_view`: `ratedPower`, `batteryChargeLimit`, `batteryDischargeLimit` (20–100 %, Schritt 5), `batteryPriorityModeStatus`, `emCommStatus` (Smart-Meter-Schalter)
 - Stack-Geräte: `POST stacking/setProperty/{id}` mit `{"key","value"}`
@@ -125,3 +125,7 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 - `batteryPriorityModeStatus`: `0` = „Zuerst entladen", `1` = „Energiespeicherung zuerst" (App auf „Energiespeicherung zuerst" gestellt → API lieferte `1`). Im Modus 1 ging die gesamte PV-Leistung in die Batterie (`outputPower` 0 W, `batteryPower` = `photovoltaicPower` = 200,2 W, `batteryStatus` 1).
 - `emFeedbackValue` (Smart Meter): **positiv = Netzbezug, negativ = Einspeisung** (+121,7 W bei `outputPower` 0 und Hausverbrauch; −21,8 W bei 151,8 W Ausgang).
 - Priorität und Ladegrenze wirken in der App sofort sichtbar (Schreiben `batteryChargeLimit=99` → App „Ladungsgrenze 99 %").
+
+### Verifiziert: Zurücksetzen und Modus schreiben (2026-10-10 14:28 UTC)
+- `batteryChargeLimit` 99 → 100: HTTP 200, `data: 100`, danach `100.0`.
+- `batteryPriorityModeStatus` 1 → 0 („Zuerst entladen"): HTTP 200, `data: 0`, nach 5 s `0`. Gleicher Endpunkt/Body wie bei der Ladegrenze (`photovoltaic/setRatedPower/{serialNum}`, `{"key","value"}`).
