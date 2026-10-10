@@ -32,3 +32,17 @@ Das Repo enthält keine Herstellerdateien (APK, `libapp.so`), nur eigene Erkennt
 5. Optional: Live-Mitschnitt der eigenen Verbindung (mitmproxy / HAR-Export) zur Verifikation.
 
 Ergebnisse stehen in [docs/protocol.md](docs/protocol.md). Nur für Interoperabilität mit dem eigenen Gerät und privat gedacht; Zugangsdaten und Tokens gehören nie ins Repo.
+
+## Testskript (read-only)
+
+`tools/minjet_probe.py` loggt sich in die Minjet-Cloud ein, listet die Geräte und liest die PV-Daten. Es ändert nichts am Gerät, nutzt nur die Standardbibliothek (Python ≥ 3.9) und maskiert Token, Seriennummer, MAC und E-Mail in der Ausgabe.
+
+```sh
+export MINJET_USER='mail@example.com'   # oder weglassen -> Prompt
+export MINJET_PASS='...'
+python3 tools/minjet_probe.py --out /tmp/minjet.json --ws 60
+```
+
+- `--ws SEK`: WebSocket zusätzlich SEK Sekunden mitschneiden
+- `--raw`: nicht maskieren (nur lokal ansehen, nie teilen)
+- Zugangsdaten nie ins Repo schreiben
