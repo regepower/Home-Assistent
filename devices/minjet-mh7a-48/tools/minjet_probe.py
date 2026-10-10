@@ -215,7 +215,7 @@ def probe_extra(token, devices, base, raw, results):
     try:
         tz = zoneinfo.ZoneInfo("Europe/Berlin")
     except zoneinfo.ZoneInfoNotFoundError:
-        tz = datetime.timezone.utc
+        tz = datetime.UTC
     today = datetime.datetime.now(tz).date()
     ranges = {
         "month": (today.replace(day=1), 1),

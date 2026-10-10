@@ -1,0 +1,102 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Minjet",
+        "description": "Log in with your Minjet app account.",
+        "data": {
+          "username": "Email",
+          "password": "Password"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate",
+        "description": "The login for {username} no longer works. Enter the current password.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot connect to the Minjet cloud.",
+      "invalid_auth": "Invalid email or password.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This account is already configured.",
+      "reauth_successful": "Re-authentication was successful."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery_level": {
+        "name": "Battery"
+      },
+      "battery_power": {
+        "name": "Battery power"
+      },
+      "battery_state": {
+        "name": "Battery state",
+        "state": {
+          "idle": "Idle",
+          "charging": "Charging",
+          "discharging": "Discharging"
+        }
+      },
+      "pv_power": {
+        "name": "Solar power"
+      },
+      "output_power": {
+        "name": "Output power"
+      },
+      "smart_meter_power": {
+        "name": "Smart meter power"
+      },
+      "energy_generated": {
+        "name": "Energy generated (total)"
+      },
+      "energy_used": {
+        "name": "Energy used (total)"
+      },
+      "temperature_1": {
+        "name": "Temperature 1"
+      },
+      "temperature_2": {
+        "name": "Temperature 2"
+      },
+      "cell_voltage_min": {
+        "name": "Lowest cell voltage"
+      },
+      "cell_voltage_max": {
+        "name": "Highest cell voltage"
+      },
+      "charge_limit": {
+        "name": "Charge limit"
+      },
+      "discharge_limit": {
+        "name": "Discharge limit"
+      },
+      "rated_power": {
+        "name": "Rated power"
+      },
+      "priority_mode": {
+        "name": "Battery priority mode",
+        "state": {
+          "discharge_first": "Discharge first",
+          "storage_first": "Energy storage first"
+        }
+      },
+      "wifi_signal": {
+        "name": "Wi-Fi signal"
+      }
+    },
+    "binary_sensor": {
+      "online": {
+        "name": "Online"
+      },
+      "smart_meter_connected": {
+        "name": "Smart meter connected"
+      }
+    }
+  }
+}

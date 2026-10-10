@@ -35,7 +35,7 @@ Ergebnisse stehen in [docs/protocol.md](docs/protocol.md). Nur für Interoperabi
 
 ## Testskript (read-only)
 
-`tools/minjet_probe.py` loggt sich in die Minjet-Cloud ein, listet die Geräte und liest die PV-Daten. Es ändert nichts am Gerät, nutzt nur die Standardbibliothek (Python ≥ 3.9) und maskiert Token, Seriennummer, MAC und E-Mail in der Ausgabe.
+`tools/minjet_probe.py` loggt sich in die Minjet-Cloud ein, listet die Geräte und liest die PV-Daten. Es ändert nichts am Gerät, nutzt nur die Standardbibliothek (Python ≥ 3.11) und maskiert Token, Seriennummer, MAC und E-Mail in der Ausgabe.
 
 ```sh
 export MINJET_USER='mail@example.com'   # oder weglassen -> Prompt
