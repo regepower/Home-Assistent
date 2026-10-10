@@ -28,3 +28,8 @@ Quelle: Strings aus `libapp.so` der APK v2.0.2(19) (apktool-Export in `captures/
 1. Dart-AOT dekompilieren (blutter / reFlutter) → Request-/Frame-Strukturen, Login-Pfad
 2. Live-Mitschnitt: mitmproxy (REST, WS) und HCI-Snoop (BLE); Zertifikats-Pinning prüfen
 3. Entscheiden: lokal (BLE) vs. Cloud-Polling für HA
+
+## Hinweis: `libapp.so` im ZIP ist defekt
+- Der apktool-M-Export hat die Binärdatei als UTF-8-Text behandelt (~4,8 Mio. Bytes zu `EF BF BD` ersetzt, ELF-Header kaputt) → blutter bricht ab, Original nicht rekonstruierbar.
+- `libflutter.so` ist intakt, die Strings oben stammen aus der noch lesbaren Datei und sind daher nur teilweise vollständig.
+- Benötigt: originale APK bzw. unveränderte `libapp.so` (arm64) → siehe `captures/`.
