@@ -1,6 +1,6 @@
 # Protokoll (Findings)
 
-Quelle: blutter-Dekompilierung von `libapp.so` + `libflutter.so` (Minjet Android, Flutter/Dart 3.x, passende Paarung aus derselben APK-Version). Nur statisch ermittelt, noch nicht gegen die Cloud getestet.
+Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud verifiziert (GitHub-Runner, eigener Account). Quelle der Pfade: blutter-Dekompilierung von `libapp.so` + `libflutter.so` (Minjet Android, Flutter/Dart 3.x, passende Paarung aus derselben APK-Version). Nur statisch ermittelt, noch nicht gegen die Cloud getestet.
 
 ## App
 - Flutter (Dart AOT), Package `minjet`; relevante Dateien: `utils/http_api.dart`, `utils/socket.dart`, `providers/model/device_model.dart`, `page/{balcony,stack}_*_view.dart`
@@ -32,7 +32,7 @@ Quelle: blutter-Dekompilierung von `libapp.so` + `libflutter.so` (Minjet Android
 | Benachrichtigungen | `app/notice/{queryAppNoticeList,queryUnreadMessageCount,read,queryDeviceDetailNoticeList/{id}}` |
 | Profil | `system/user/profile/{updateNickName,updatePwd,updateUserTimeZone,avatar}` |
 
-Ob `{id}` die `deviceId` oder `serialNum` ist, ist noch offen (Call-Site baut den Pfad per String-Interpolation).
+**Verifiziert:** `{id}` ist die `serialNum` (mit `deviceId` kommt `500 The device is not bound`).
 
 ## Geräteobjekt (`device_model.dart`)
 - Stammdaten: `deviceId`, `deviceName`, `customName`, `serialNum`, `macAddress`, `productKey`, `productCode`, `productName`, `bindTime`, `activeTime`, `deviceCurrentVersion`, `deviceLatestVersion`
@@ -40,8 +40,34 @@ Ob `{id}` die `deviceId` oder `serialNum` ist, ist noch offen (Call-Site baut de
 - Schalter/Einstellungen (setProperty-Keys): `ACSwitchStatus`, `DCSwitchStatus`, `USBSwitchStatus`, `BuzzerSwitchStatus`, `childLockStatus`, `onGridModeStatus`, `antiIslandingProtectionModeStatus`, `batteryPriorityModeStatus`, `maxOnGridPower`, `maxAntiIslandingProtectionPower`, `batteryChargeLimit`, `batteryDischargeLimit`, `standByTime`, `chargePower`, `customName`
 - Weiteres: `parallelMachine`, `parallelFlagStatus`, `emType`/`emName`/`emCommStatus`/`emConfigStatus` (Energy Meter), `ratedPower`
 
+## Verifizierte Antworten
+- `POST /login` → `{"code":200,"msg":"success","token":"<JWT>"}`; Token ab dann als Bearer
+- `GET getInfo` → `{user:{userId,userName,nickName,email,timeZone,language,...}}` (liefert u. a. den Passwort-Hash des Users zurück, nie loggen/teilen)
+- `GET device/queryUserDeviceList` → `{"data":[{deviceId, productCode:"MH7A-48", productTypeCode:"MH7A", deviceName, customName, serialNum, deviceStatus ("1"=online), deviceCurrentVersion, deviceLatestVersion, properties:{...}}]}`
+- Die Live-Messwerte stehen bereits in `properties` der Geräteliste (kein eigener Aufruf nötig). Upload-Zyklus des Geräts: `uploadCycle` = 60 s → Polling < 60 s bringt nichts.
+- `GET photovoltaic/queryPhotovoltaic/{serialNum}` → Gerät + `properties` + `emName` (Energy Meter, z. B. Shelly) + `inverterName` (z. B. Deye) + Tages-/Monatswerte (`photovoltaicToday*`, `photovoltaicMonth*`)
+
+### `properties` (MH7A-48), beobachtete Felder
+| Feld | Bedeutung (Vermutung) |
+|---|---|
+| `batteryPercentage` | SOC in % |
+| `batteryPower` | Batterieleistung in W (Vorzeichen/`batteryStatus` klären: 2 = entladen?) |
+| `batteryStatus` | 0/1/2 (Lade-/Entladezustand) |
+| `outputPower` | Ausgangsleistung W |
+| `photovoltaicPower`, `photovoltaicStatus` | PV-Leistung W / Status |
+| `photovoltaicTotalGenerate`, `photovoltaicMonthGenerate`, `photovoltaicTodayGenerate` | Erzeugung kWh |
+| `energyTotalUsed`, `photovoltaicMonthUsed`, `photovoltaicTodayUsed` | Verbrauch kWh |
+| `emType`, `emCommStatus`, `emConfigStatus`, `emFeedbackValue` | Energy Meter (Netzbezug W) |
+| `ratedPower`, `batteryChargeLimit`, `batteryDischargeLimit`, `batteryPriorityModeStatus` | Einstellungen (Limits in %) |
+| `mpptInfo`, `mpptPowerLmt1/2`, `dcdcInfo` | MPPT/DC-DC-Rohwerte (Spannung/Strom ×10?, noch zu entschlüsseln) |
+| `temperature1`, `temperature2` | °C |
+| `cellVoltMin`, `cellVoltMax` | mV |
+| `chgCurrentLmt`, `dsgCurrentLmt` | Stromlimits |
+| `WiFiRSSI`, `ip0`, `version`, `debugVer`, `inverterVer`, `mpptVer` | Diagnose |
+| `warningStatus`, `mcuState` | Bitfelder (Warnungen/Status) |
+
 ## WebSocket
-- `ws://app.minjet-energy.com/ws/device?token=<token>` (unverschlüsselt!)
+- `ws://app.minjet-energy.com/ws/device?token=<token>` antwortet auf Port 80 mit `301 Moved Permanently` → vermutlich `wss://…` (Probe nutzt jetzt TLS, Test steht aus)
 - Wrapper `Socket` mit Reconnect (max. Versuche); Nachrichtenformat noch nicht ausgelesen → per Mitschnitt klären
 
 ## BLE (nur Erstinbetriebnahme/WLAN-Setup)
@@ -49,7 +75,7 @@ Ob `{id}` die `deviceId` oder `serialNum` ist, ist noch offen (Call-Site baut de
 - Für HA nicht nötig, da Betrieb über Cloud/WLAN
 
 ## Offen
-1. Pfad-Parameter `{id}` (deviceId vs. serialNum) und Antwortformat von `queryUserDeviceList` per Live-Test mit eigenem Account prüfen
-2. WebSocket-Nachrichten mitschneiden
+1. WebSocket über `wss://` mitschneiden (Nachrichtenformat, ob Push statt Polling möglich)
+2. Schreibaufrufe (`setProperty`) einzeln testen, z. B. Buzzer oder Limit
 3. Home-Assistant-Integration (Custom Component): Login, Polling/WS, Switches/Numbers per `setProperty`
 4. Rate-Limits/ToS der Cloud beachten; Polling zurückhaltend wählen

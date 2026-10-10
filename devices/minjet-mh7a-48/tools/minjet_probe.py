@@ -16,6 +16,7 @@ import json
 import os
 import re
 import socket
+import ssl
 import sys
 import time
 import urllib.error
@@ -37,6 +38,14 @@ MASK_KEYS = {
     "ip0",
     "deviceId",
     "avatar",
+    "deviceName",
+    "productKey",
+    "userId",
+    "loginIp",
+    "createTime",
+    "loginDate",
+    "bindTime",
+    "activeTime",
 }
 
 
@@ -101,11 +110,13 @@ def _recv_exact(sock, buf, count):
     return buf
 
 
-def ws_listen(token, seconds, raw, host=WS_HOST, port=80):
-    """Minimaler WebSocket-Client (ws://, ohne Fragmentierung/Kompression)."""
+def ws_listen(token, seconds, raw, host=WS_HOST, port=443, tls=True):
+    """Minimaler WebSocket-Client (wss://, ohne Fragmentierung/Kompression)."""
     key = base64.b64encode(os.urandom(16)).decode()
     deadline = time.monotonic() + seconds
     sock = socket.create_connection((host, port), timeout=10)
+    if tls:
+        sock = ssl.create_default_context().wrap_socket(sock, server_hostname=host)
     handshake = (
         f"GET {WS_PATH}?token={token} HTTP/1.1\r\n"
         f"Host: {host}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
