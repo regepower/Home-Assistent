@@ -52,8 +52,26 @@ Copy `custom_components/minjet` into the `custom_components` folder of your Home
 | Temperature 1 / 2, lowest / highest cell voltage, discharge limit, rated power | sensor | diagnostic |
 | Wi-Fi signal | sensor | diagnostic, disabled by default |
 | Online, Smart meter connected | binary sensor | connectivity |
+| Last warning | sensor | Time of the latest warning (e.g. "Niedrige SOC"); text in the attributes `message` and `title` |
+| Warning | event | Fires `warning` when the cloud issues a **new** message; use it as an automation trigger |
 | Battery priority mode | select | *Discharge first* / *Energy storage first* |
 | Charge limit | number | 20–100 %, only in *Energy storage first* mode |
+
+### Warning messages
+
+The cloud issues messages such as *low SOC* once a day. The integration reads them every 60 s. The **Warning** event entity fires only for messages that are newer than the one known at startup, so a restart does not re-trigger old warnings. Example automation trigger:
+
+```yaml
+trigger:
+  - trigger: state
+    entity_id: event.akku_warning   # adjust to your device name
+action:
+  - action: notify.mobile_app_phone
+    data:
+      message: "{{ trigger.to_state.attributes.message }}"
+```
+
+The cloud sends timestamps **without a time zone** in China standard time (UTC+8). The integration converts them, so the *Last warning* time is correct in Home Assistant. The Minjet app shows the raw server time instead, which is why the app displays e.g. 13:16 for a message that reached you at 07:16 local time.
 
 ### Controls
 

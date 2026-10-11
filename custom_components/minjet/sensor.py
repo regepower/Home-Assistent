@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -213,6 +214,9 @@ async def async_setup_entry(
         for serial in coordinator.data
         for description in SENSORS
     )
+    async_add_entities(
+        MinjetLastWarningSensor(coordinator, serial) for serial in coordinator.data
+    )
 
 
 class MinjetSensor(MinjetEntity, SensorEntity):
@@ -230,3 +234,33 @@ class MinjetSensor(MinjetEntity, SensorEntity):
     def native_value(self) -> Any:
         """Return the current value."""
         return self.entity_description.value_fn(self.properties)
+
+
+class MinjetLastWarningSensor(MinjetEntity, SensorEntity):
+    """Time of the latest warning message; text and title are attributes."""
+
+    _attr_translation_key = "last_warning"
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    def __init__(self, coordinator, serial: str) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator, serial)
+        self._attr_unique_id = f"{serial}_last_warning"
+
+    @property
+    def _notice(self) -> dict[str, Any]:
+        return self.device.get("notice") or {}
+
+    @property
+    def native_value(self) -> datetime | None:
+        """Return when the latest warning was issued."""
+        return self._notice.get("time")
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the message text and title."""
+        return {
+            "message": self._notice.get("message"),
+            "title": self._notice.get("title"),
+        }

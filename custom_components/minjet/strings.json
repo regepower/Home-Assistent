@@ -78,6 +78,9 @@
       },
       "wifi_signal": {
         "name": "Wi-Fi signal"
+      },
+      "last_warning": {
+        "name": "Last warning"
       }
     },
     "binary_sensor": {
@@ -99,6 +102,18 @@
         "state": {
           "discharge_first": "Discharge first",
           "storage_first": "Energy storage first"
+        }
+      }
+    },
+    "event": {
+      "warning": {
+        "name": "Warning",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "warning": "Warning"
+            }
+          }
         }
       }
     }

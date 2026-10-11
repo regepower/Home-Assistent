@@ -40,14 +40,26 @@ class MinjetCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         )
         self.api = api
         self._last_push: dict[str, float] = {}
+        self._last_notices: dict[str, dict[str, Any]] = {}
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         try:
-            return await self.api.async_get_devices()
+            devices = await self.api.async_get_devices()
         except MinjetAuthError as err:
             raise ConfigEntryAuthFailed(str(err)) from err
         except MinjetError as err:
             raise UpdateFailed(str(err)) from err
+        try:
+            self._last_notices = await self.api.async_get_notices()
+        except MinjetAuthError as err:
+            raise ConfigEntryAuthFailed(str(err)) from err
+        except MinjetError as err:
+            # warnings are a bonus: keep the previous ones, do not fail the update
+            _LOGGER.debug("Could not read Minjet notices: %s", err)
+        for serial, notice in self._last_notices.items():
+            if serial in devices:
+                devices[serial]["notice"] = notice
+        return devices
 
     def start_websocket(self) -> None:
         """Start the push listener as a background task of the config entry."""

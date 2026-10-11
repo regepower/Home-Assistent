@@ -47,8 +47,26 @@ Ordner `custom_components/minjet` in den Ordner `custom_components` deiner Home-
 | Temperatur 1/2, Zellspannung min/max, Entladegrenze, Nennleistung | sensor | Diagnose |
 | WLAN-Signal | sensor | Diagnose, standardmäßig deaktiviert |
 | Online, Smart Meter verbunden | binary sensor | Konnektivität |
+| Letzte Warnung | sensor | Zeitpunkt der letzten Warnung (z. B. „Niedrige SOC"); Text in den Attributen `message` und `title` |
+| Warnung | event | Löst `warning` aus, wenn die Cloud eine **neue** Meldung ausgibt; als Automations-Trigger nutzbar |
 | Batterie-Prioritätsmodus | select | *Zuerst entladen* / *Energiespeicherung zuerst* |
 | Ladegrenze | number | 20–100 %, nur im Modus *Energiespeicherung zuerst* |
+
+### Warnmeldungen
+
+Die Cloud gibt Meldungen wie *Niedrige SOC* einmal täglich aus. Die Integration liest sie alle 60 s. Die Entität **Warnung** löst nur für Meldungen aus, die neuer sind als die beim Start bekannte; ein Neustart löst alte Warnungen also nicht erneut aus. Beispiel für einen Automations-Trigger:
+
+```yaml
+trigger:
+  - trigger: state
+    entity_id: event.akku_warning   # an den Gerätenamen anpassen
+action:
+  - action: notify.mobile_app_handy
+    data:
+      message: "{{ trigger.to_state.attributes.message }}"
+```
+
+Die Cloud sendet Zeitstempel **ohne Zeitzone** in chinesischer Standardzeit (UTC+8). Die Integration rechnet sie um, daher stimmt *Letzte Warnung* in Home Assistant. Die Minjet-App zeigt dagegen die rohe Serverzeit an, deshalb steht dort z. B. 13:16 bei einer Meldung, die um 07:16 Ortszeit bei dir ankam.
 
 ### Steuerung
 

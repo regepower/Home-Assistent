@@ -63,8 +63,36 @@ def device() -> dict[str, Any]:
     return deepcopy(DEVICE)
 
 
+def notice_response(time: str = "2026-10-10 13:16:54") -> dict[str, Any]:
+    """Return a queryAppNoticeList response; times are UTC+8 like the real cloud."""
+    return {
+        "code": 200,
+        "msg": "success",
+        "data": {
+            "systemList": [],
+            "deviceUnReadCount": 1,
+            "deviceList": [
+                {
+                    "deviceId": "4711",
+                    "serialNum": SERIAL,
+                    "customName": "Akku",
+                    "unReadMessageCount": 10,
+                    "lastMessage": {
+                        "text": "Niedrige SOC",
+                        "time": time,
+                        "title": "Warning message",
+                    },
+                }
+            ],
+        },
+    }
+
+
 def register_cloud(
-    aioclient_mock: AiohttpClientMocker, device: dict[str, Any]
+    aioclient_mock: AiohttpClientMocker,
+    device: dict[str, Any],
+    notices: dict[str, Any] | None = None,
+    notices_status: int = 200,
 ) -> AiohttpClientMocker:
     """(Re-)register the REST mocks; the JSON body is frozen at registration."""
     aioclient_mock.clear_requests()
@@ -74,6 +102,11 @@ def register_cloud(
     aioclient_mock.get(
         f"{BASE_URL}/device/queryUserDeviceList",
         json={"code": 200, "msg": "success", "data": [device]},
+    )
+    aioclient_mock.get(
+        f"{BASE_URL}/app/notice/queryAppNoticeList",
+        json=notices or notice_response(),
+        status=notices_status,
     )
     return aioclient_mock
 

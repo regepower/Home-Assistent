@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime, timedelta, timezone
 import json
 import logging
 from typing import Any
@@ -14,6 +15,9 @@ from .const import BASE_URL, WRITABLE_KEYS, WS_RECEIVE_TIMEOUT, WS_URL
 _LOGGER = logging.getLogger(__name__)
 
 REQUEST_TIMEOUT = aiohttp.ClientTimeout(total=20)
+
+# The cloud sends naive timestamps in China standard time (UTC+8, no DST).
+SERVER_TZ = timezone(timedelta(hours=8))
 
 
 class MinjetError(Exception):
@@ -71,6 +75,24 @@ class MinjetApi:
             for device in devices
             if isinstance(device, dict) and device.get("serialNum")
         }
+
+    async def async_get_notices(self) -> dict[str, dict[str, Any]]:
+        """Return the latest warning message per device, keyed by serial number."""
+        data = await self._request("GET", "app/notice/queryAppNoticeList")
+        devices = (data.get("data") or {}).get("deviceList")
+        if not isinstance(devices, list):
+            raise MinjetConnectionError("unexpected notice list response")
+        notices: dict[str, dict[str, Any]] = {}
+        for item in devices:
+            if not isinstance(item, dict) or not item.get("serialNum"):
+                continue
+            last = item.get("lastMessage") or {}
+            notices[item["serialNum"]] = {
+                "message": last.get("text"),
+                "title": last.get("title"),
+                "time": parse_server_time(last.get("time")),
+            }
+        return notices
 
     async def async_set_property(self, serial: str, key: str, value: int) -> None:
         """Write one device property (balcony storage: setRatedPower endpoint)."""
@@ -169,6 +191,17 @@ class MinjetApi:
         if auth and data.get("code") == 401:
             raise MinjetAuthError(str(data.get("msg") or "token rejected"))
         return data
+
+
+def parse_server_time(value: Any) -> datetime | None:
+    """Convert a naive cloud timestamp (UTC+8) to an aware UTC datetime."""
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.strptime(value, "%Y-%m-%d %H:%M:%S")  # noqa: DTZ007
+    except ValueError:
+        return None
+    return parsed.replace(tzinfo=SERVER_TZ).astimezone(UTC)
 
 
 def _parse_ws_message(raw: str) -> dict[str, Any] | None:

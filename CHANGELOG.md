@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0
+- New `event` entity "Warning": fires when the cloud issues a new warning message (for example low SOC). The message known at startup does not fire.
+- New diagnostic `sensor` "Last warning" (timestamp, message and title as attributes).
+- Cloud timestamps are converted from UTC+8 to UTC (the Minjet app shows the raw server time).
+
 ## 0.2.1
 - Fix: an expired token on the WebSocket is renewed with a fresh login instead of immediately asking for reauthentication.
 - Added brand icon, license, English and German documentation.

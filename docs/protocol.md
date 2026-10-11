@@ -80,7 +80,7 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 3. Home-Assistant-Integration (Custom Component): Login, Polling/WS, Switches/Numbers per `setProperty`
 4. Rate-Limits/ToS der Cloud beachten; Polling zurückhaltend wählen
 
-## Tages-/Monatswerte und Benachrichtigungen (aus der App-Logik, noch ungetestet)
+## Tages-/Monatswerte und Benachrichtigungen
 - Live-API liefert `photovoltaicTodayGenerate` = `photovoltaicMonthGenerate` = `photovoltaicTotalGenerate` (402.1) sowie `photovoltaicTodayUsed` = `energyTotalUsed` (353.8): die „heute"-Felder sind faktisch **Gesamtzähler** (App zeigt deshalb „Heute erzeugt" falsch).
 - `GET deviceReport/queryDeviceStatistics?serialNum=<SN>&startDate=yyyy-MM-dd&endDate=yyyy-MM-dd&dateType=<1|2|3>` (1 = Monat, 2 = Jahr, 3 = Lebensdauer); Antwort `data.list`, `data.totalGenerate`, `data.totalUsed`
 - `GET deviceReport/queryPhotovoltaicPowerStatistics?serialNum=<SN>&dateTime=yyyy-MM-dd` (Leistungsverlauf eines Tages)
@@ -134,3 +134,9 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 - Beobachtung (Nutzer, 2026-10-10): Steht der Prioritätsmodus auf „Zuerst entladen" (`batteryPriorityModeStatus = 0`), blendet die App die Felder **Ladungsgrenze** und **Entladungsgrenze** aus; im Modus „Energiespeicherung zuerst" (`1`) erscheinen sie (z. B. 99 % / 20 %).
 - Folgerung: Die Limits sind nur im Modus 1 relevant. Ob die Cloud/Firmware Limit-Schreibzugriffe im Modus 0 annimmt oder ignoriert, ist **ungetestet**. Die Werte `batteryChargeLimit`/`batteryDischargeLimit` bleiben in `properties` auch im Modus 0 sichtbar (z. B. 100/20).
 - Für HA: falls später `number`-Entitäten für die Limits ergänzt werden, nur im Modus 1 anbieten bzw. im Modus 0 als nicht verfügbar markieren.
+
+### Zeitzone der Cloud: UTC+8 (China), Zeitstempel ohne Zeitzone
+- Belege: `loginDate` im `getInfo` eines Laufs um 13:16:39 UTC lautete `21:16:39+08:00`; die tägliche Warnung „Niedrige SOC" steht in der API immer bei `13:16:5x` (08.–10.10.) und erreichte das Handy am 11.10. um ca. 07:17 Ortszeit (MESZ) = 13:17 UTC+8.
+- Folge: Die naiven Strings (z. B. `"time": "2026-10-10 13:16:54"`) in `app/notice/*` sind **UTC+8**. Die Minjet-App zeigt sie ungewandelt an (deshalb „immer 13:16"). Die HA-Integration wandelt sie nach UTC (`SERVER_TZ = UTC+8`, China kennt keine Sommerzeit).
+- Die Warnung scheint ein täglicher Server-Job um 13:16 (UTC+8) zu sein, kein Echtzeit-Ereignis beim Unterschreiten der SOC-Grenze.
+- `app/notice/queryAppNoticeList` → `data.deviceList[]` mit `serialNum`, `lastMessage{text,time,title}`, `unReadMessageCount`; die Integration nutzt das für Sensor „Letzte Warnung" und das Event „Warnung".

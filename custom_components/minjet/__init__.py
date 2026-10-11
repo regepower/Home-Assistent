@@ -12,6 +12,7 @@ from .coordinator import MinjetCoordinator
 
 PLATFORMS = [
     Platform.BINARY_SENSOR,
+    Platform.EVENT,
     Platform.NUMBER,
     Platform.SELECT,
     Platform.SENSOR,
