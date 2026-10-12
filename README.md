@@ -157,4 +157,4 @@ The repository also contains research notes and a small read-only probe script f
 
 ## License
 
-[MIT](LICENSE). "Minjet" and related names belong to their respective owners.
+[MIT](LICENSE). "Minjet", the Minjet logo (used as the integration icon) and related names belong to their respective owners. The logo only identifies the device the integration works with; this project is not affiliated with Minjet. The MIT license does not cover the logo.

@@ -150,4 +150,4 @@ Das Repository enthält außerdem Recherche-Notizen und ein kleines, nur lesende
 
 ## Lizenz
 
-[MIT](LICENSE). „Minjet" und verwandte Namen gehören ihren jeweiligen Inhabern.
+[MIT](LICENSE). „Minjet", das Minjet-Logo (als Icon der Integration) und verwandte Namen gehören ihren jeweiligen Inhabern. Das Logo kennzeichnet nur das Gerät, mit dem die Integration arbeitet; das Projekt steht in keiner Verbindung zu Minjet. Die MIT-Lizenz gilt nicht für das Logo.

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.6
+- Integration icon is now the Minjet logo from the app.
+
 ## 0.5.5
 - Priority mode, charge limit, discharge limit and *Live 5 min* are back in the **Controls** section (no entity category), so the auto-generated dashboard shows them.
 
