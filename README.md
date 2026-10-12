@@ -58,6 +58,8 @@ Copy `custom_components/minjet` into the `custom_components` folder of your Home
 | Warning | event | Fires `warning` when the cloud issues a **new** message; use it as an automation trigger |
 | Priority mode | select | *Discharge first* / *Storage first* |
 | Charge limit | number | 20–100 %, only in *Storage first* mode |
+| Live 5 min | button | ~2 s updates for 5 minutes, see [Live mode](#live-mode) |
+| Live active | binary sensor | `on` while live mode runs |
 
 ### Power flow
 
@@ -93,6 +95,10 @@ Only these two settings are writable, and both were verified against the real cl
 
 The rated output power is intentionally **read-only**: while the smart meter switch is on, the device regulates it by itself based on your smart meter.
 
+### Live mode
+
+Press **Live 5 min** to get updates about every 2 seconds for 5 minutes, e.g. to watch the power flow on a dashboard. It does the same as opening the live view in the Minjet app: it opens the cloud WebSocket, which switches the device to 2-second uploads, and afterwards ends that mode with the same call the app uses (`closeRealTimeStatus`). The mode is always ended after 5 minutes, and also when the integration is reloaded, unloaded or Home Assistant stops. Pressing again while live does nothing. Polling every 60 s continues in the background.
+
 ## Daily values and the Energy dashboard
 
 The cloud's "today" and "month" fields are actually lifetime totals, and its statistics endpoint returns zeros. Build daily or monthly values in Home Assistant, for example:
@@ -114,7 +120,7 @@ Use *Generated total* as the solar production source in the Energy dashboard. Th
 - Login: `POST /login`, bearer token; an expired token is renewed automatically; you are only asked to reauthenticate if the login itself fails.
 - Data: the device list (including all live values) is polled every 60 s; warning messages every 10 minutes.
 - Last known values: if the cloud leaves a value out, after a restart, or during a short outage (up to 5 minutes) the last known value is shown instead of *unknown*/*unavailable*. Check the *Online* sensor to see whether the device itself is reporting.
-- **No WebSocket on purpose:** the cloud also offers a live WebSocket, but while it is open the device is switched to a 2-second "realtime" upload mode. The Minjet app ends that mode when you leave its live view; a permanently open connection kept the device in it and made it drop offline (seen with version 0.3.0). Polling every 60 s matches what the app does in the background.
+- **No permanent WebSocket on purpose:** the cloud also offers a live WebSocket, but while it is open the device is switched to a 2-second "realtime" upload mode. The Minjet app ends that mode when you leave its live view; a permanently open connection kept the device in it and made it drop offline (seen with version 0.3.0). Polling every 60 s matches what the app does in the background. The WebSocket is only used by the time-limited [live mode](#live-mode).
 - Writes: a single REST call per change; the new value is shown immediately and confirmed by the next update.
 
 Details of the reverse engineering are in [`docs/`](docs).

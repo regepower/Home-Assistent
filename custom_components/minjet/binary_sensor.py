@@ -63,6 +63,9 @@ async def async_setup_entry(
         for serial in coordinator.data
         for description in BINARY_SENSORS
     )
+    async_add_entities(
+        MinjetLiveBinarySensor(coordinator, serial) for serial in coordinator.data
+    )
 
 
 class MinjetBinarySensor(MinjetEntity, BinarySensorEntity):
@@ -80,3 +83,20 @@ class MinjetBinarySensor(MinjetEntity, BinarySensorEntity):
     def is_on(self) -> bool | None:
         """Return the state."""
         return self.entity_description.value_fn(self.device)
+
+
+class MinjetLiveBinarySensor(MinjetEntity, BinarySensorEntity):
+    """On while a live session (2 s updates) is running."""
+
+    _attr_translation_key = "live_active"
+    _attr_device_class = BinarySensorDeviceClass.RUNNING
+
+    def __init__(self, coordinator, serial: str) -> None:
+        """Initialize the binary sensor."""
+        super().__init__(coordinator, serial)
+        self._attr_unique_id = f"{serial}_live_active"
+
+    @property
+    def is_on(self) -> bool:
+        """Return True while live mode is active."""
+        return self._serial in self.coordinator.live_serials

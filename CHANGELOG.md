@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.3
+- New **Live 5 min** button: about 2-second updates for 5 minutes, like the live view in the Minjet app. The realtime mode is always ended afterwards (`closeRealTimeStatus`), also on reload, unload and Home Assistant shutdown.
+- New **Live active** binary sensor (`on` while live mode runs).
+
 ## 0.5.2
 - German names use Σ instead of „gesamt“: *Solar Σ*, *Erzeugt Σ*, *Verbraucht Σ* (English names and entity IDs unchanged).
 - README: fixed `utility_meter` example entity IDs.

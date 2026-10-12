@@ -5,12 +5,18 @@ from datetime import timedelta
 DOMAIN = "minjet"
 
 BASE_URL = "https://app.minjet-energy.com/prod-api"
+WS_URL = "wss://app.minjet-energy.com/ws/device"
 
 # The device reports every 60 s on its own; polling faster gains nothing.
 # A permanently open WebSocket keeps the device in a 2 s "realtime" upload mode
 # (the app ends that mode when its live view closes), which made the device drop
-# offline in practice, so this integration only polls.
+# offline in practice, so the integration normally only polls.
 SCAN_INTERVAL = timedelta(seconds=60)
+
+# Live mode (button): like the app's live view, but always ended after this time
+# with photovoltaic/closeRealTimeStatus, exactly as the app does.
+LIVE_DURATION = timedelta(minutes=5)
+LIVE_MIN_UPDATE = 2.0  # seconds between applied live updates
 
 # Warning messages are issued about once a day; no need to ask every minute.
 NOTICE_INTERVAL = timedelta(minutes=10)

@@ -2,16 +2,23 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from typing import TYPE_CHECKING, Any
 
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import MinjetApi, MinjetAuthError, MinjetError
-from .const import DOMAIN, NOTICE_INTERVAL, SCAN_INTERVAL
+from .const import (
+    DOMAIN,
+    LIVE_DURATION,
+    LIVE_MIN_UPDATE,
+    NOTICE_INTERVAL,
+    SCAN_INTERVAL,
+)
 
 if TYPE_CHECKING:
     from homeassistant.config_entries import ConfigEntry
@@ -35,6 +42,8 @@ class MinjetCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         self._notices_fetched: float | None = None
         self._last_notices: dict[str, dict[str, Any]] = {}
         self.last_success: float | None = None
+        self.live_serials: set[str] = set()
+        self._last_push: dict[str, float] = {}
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         try:
@@ -69,6 +78,66 @@ class MinjetCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             # Repeated failures do not notify listeners; let the entities re-check
             # whether the last values are now too old (STALE_AFTER).
             self.async_update_listeners()
+
+    @callback
+    def start_live(self, serial: str) -> None:
+        """Start a time-limited live session (no-op while one is running)."""
+        if serial in self.live_serials:
+            return
+        assert self.config_entry is not None
+        self.live_serials.add(serial)
+        self.config_entry.async_create_background_task(
+            self.hass, self._async_live_session(serial), name=f"minjet live {serial}"
+        )
+        self.async_update_listeners()
+
+    async def _async_live_session(self, serial: str) -> None:
+        try:
+            async with asyncio.timeout(LIVE_DURATION.total_seconds()):
+                await self.api.async_query_detail(serial)
+                await self.api.async_run_websocket(self._async_handle_push)
+        except TimeoutError:
+            pass
+        except MinjetError as err:
+            _LOGGER.warning("Minjet live mode ended early: %s", err)
+        finally:
+            # Always end the realtime mode, also on cancel (unload, shutdown).
+            await asyncio.shield(self._async_end_live(serial))
+
+    async def _async_end_live(self, serial: str) -> None:
+        try:
+            await self.api.async_close_realtime(serial)
+        except MinjetError as err:
+            _LOGGER.warning("Could not end the Minjet realtime mode: %s", err)
+        finally:
+            self.live_serials.discard(serial)
+            self._last_push.pop(serial, None)
+            self.async_update_listeners()
+
+    @callback
+    def _async_handle_push(self, device: dict[str, Any]) -> None:
+        """Apply a live push (at most every LIVE_MIN_UPDATE seconds)."""
+        serial = device.get("serialNum")
+        if serial not in self.live_serials or serial not in (self.data or {}):
+            return
+        now = time.monotonic()
+        if now - self._last_push.get(serial, 0.0) < LIVE_MIN_UPDATE:
+            return
+        self._last_push[serial] = now
+        old = self.data[serial]
+        merged = {**old, **device}
+        merged["properties"] = {
+            **(old.get("properties") or {}),
+            **{
+                k: v
+                for k, v in (device.get("properties") or {}).items()
+                if v is not None
+            },
+        }
+        data = dict(self.data)
+        data[serial] = merged
+        self.last_success = now
+        self.async_set_updated_data(data)
 
     async def async_set_property(self, serial: str, key: str, value: int) -> None:
         """Write a property and update the local state optimistically.

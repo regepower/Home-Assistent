@@ -53,6 +53,8 @@ Ordner `custom_components/minjet` in den Ordner `custom_components` deiner Home-
 | Warnung | event | Löst `warning` aus, wenn die Cloud eine **neue** Meldung ausgibt; als Automations-Trigger nutzbar |
 | Prioritätsmodus | select | *Zuerst entladen* / *Zuerst speichern* |
 | Ladegrenze | number | 20–100 %, nur im Modus *Zuerst speichern* |
+| Live 5 min | button | ca. 2-s-Updates für 5 Minuten, siehe [Live-Modus](#live-modus) |
+| Live aktiv | binary sensor | `on`, solange der Live-Modus läuft |
 
 ### Energiefluss
 
@@ -87,6 +89,10 @@ Nur diese zwei Einstellungen sind schreibbar, beide gegen die echte Cloud verifi
 - **Ladegrenze** (`number`): Die Minjet-App blendet die Limits im Modus *Zuerst entladen* aus, daher ist die Entität dort **nicht verfügbar**. Der Wert muss über der Entladegrenze liegen.
 
 Die Nennleistung ist bewusst **nur lesbar**: Bei eingeschaltetem Smart-Meter-Schalter regelt das Gerät sie selbst anhand deines Smart Meters.
+
+### Live-Modus
+
+**Live 5 min** drücken liefert 5 Minuten lang etwa alle 2 Sekunden neue Werte, z. B. um den Energiefluss im Dashboard zu beobachten. Das entspricht dem Öffnen der Live-Ansicht in der Minjet-App: Der Cloud-WebSocket wird geöffnet (Gerät lädt dann alle 2 s hoch) und danach wird der Modus mit demselben Aufruf wie in der App beendet (`closeRealTimeStatus`). Der Modus endet immer nach 5 Minuten, ebenso beim Neuladen/Entladen der Integration oder Beenden von Home Assistant. Erneutes Drücken während Live bewirkt nichts. Die 60-s-Abfrage läuft im Hintergrund weiter.
 
 ## Tageswerte und Energie-Dashboard
 
@@ -124,9 +130,9 @@ Zugangsdaten liegen im Config-Entry-Speicher von Home Assistant und gehen nur an
 
 Fehlt ein Wert in der Cloud-Antwort, nach einem Neustart oder während einer kurzen Störung (bis 5 Minuten), zeigt die Integration den zuletzt bekannten Wert statt *unbekannt*/*nicht verfügbar*. Ob das Gerät selbst noch meldet, zeigt der Sensor *Online*.
 
-## Warum kein Live-WebSocket?
+## Warum kein dauerhafter Live-WebSocket?
 
-Die Cloud bietet auch einen Live-WebSocket an. Solange er offen ist, schaltet die Cloud das Gerät aber in einen 2-Sekunden-„Echtzeit"-Upload. Die Minjet-App beendet diesen Modus, sobald man ihre Live-Ansicht verlässt. Eine dauerhaft offene Verbindung (Version 0.3.0) hielt das Gerät in diesem Modus und ließ es offline gehen. Deshalb fragt die Integration nur noch alle 60 s ab, wie die App im Hintergrund.
+Die Cloud bietet auch einen Live-WebSocket an. Solange er offen ist, schaltet die Cloud das Gerät aber in einen 2-Sekunden-„Echtzeit"-Upload. Die Minjet-App beendet diesen Modus, sobald man ihre Live-Ansicht verlässt. Eine dauerhaft offene Verbindung (Version 0.3.0) hielt das Gerät in diesem Modus und ließ es offline gehen. Deshalb fragt die Integration alle 60 s ab, wie die App im Hintergrund. Den WebSocket nutzt nur der zeitlich begrenzte [Live-Modus](#live-modus).
 
 ## Entwicklung
 

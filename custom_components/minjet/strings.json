@@ -98,6 +98,9 @@
       },
       "smart_meter_connected": {
         "name": "Smart meter"
+      },
+      "live_active": {
+        "name": "Live active"
       }
     },
     "number": {
@@ -124,6 +127,11 @@
             }
           }
         }
+      }
+    },
+    "button": {
+      "live": {
+        "name": "Live 5 min"
       }
     }
   },
