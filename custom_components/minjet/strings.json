@@ -70,9 +70,6 @@
       "cell_voltage_max": {
         "name": "Cell voltage max"
       },
-      "discharge_limit": {
-        "name": "Discharge limit"
-      },
       "rated_power": {
         "name": "Rated power"
       },
@@ -106,6 +103,9 @@
     "number": {
       "charge_limit": {
         "name": "Charge limit"
+      },
+      "discharge_limit": {
+        "name": "Discharge limit"
       }
     },
     "select": {
@@ -141,6 +141,9 @@
     },
     "charge_limit_too_low": {
       "message": "The charge limit must be above the discharge limit ({discharge} %)."
+    },
+    "discharge_limit_too_high": {
+      "message": "The discharge limit must be below the charge limit ({charge} %)."
     }
   }
 }

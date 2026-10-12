@@ -46,14 +46,15 @@ Ordner `custom_components/minjet` in den Ordner `custom_components` deiner Home-
 | Zum Wechselrichter | sensor | W, Solar direkt + Entladeleistung |
 | Netzleistung | sensor | W, **positiv = Bezug, negativ = Einspeisung** |
 | Erzeugt Σ / Verbraucht Σ | sensor | kWh, `total_increasing` |
-| Temperatur 1/2, Zellspannung min/max, Entladegrenze, Nennleistung | sensor | Diagnose |
+| Temperatur 1/2, Zellspannung min/max, Nennleistung | sensor | Diagnose |
 | WLAN-Signal | sensor | Diagnose, standardmäßig deaktiviert |
 | Online, Smart Meter | binary sensor | Konnektivität |
 | Letzte Warnung | sensor | Zeitpunkt der letzten Warnung (z. B. „Niedrige SOC"); Text in den Attributen `message` und `title` |
 | Warnung | event | Löst `warning` aus, wenn die Cloud eine **neue** Meldung ausgibt; als Automations-Trigger nutzbar |
-| Prioritätsmodus | select | *Zuerst entladen* / *Zuerst speichern* |
-| Ladegrenze | number | 20–100 %, nur im Modus *Zuerst speichern* |
-| Live 5 min | button | ca. 2-s-Updates für 5 Minuten, siehe [Live-Modus](#live-modus) |
+| Prioritätsmodus | select | Konfiguration; *Zuerst entladen* / *Zuerst speichern* |
+| Ladegrenze | number | Konfiguration; 20–100 %, nur im Modus *Zuerst speichern* |
+| Entladegrenze | number | Konfiguration; 20–100 % in 5er-Schritten, nur im Modus *Zuerst speichern* |
+| Live 5 min | button | Konfiguration; ca. 2-s-Updates für 5 Minuten, siehe [Live-Modus](#live-modus) |
 | Live aktiv | binary sensor | `on`, solange der Live-Modus läuft |
 
 ### Energiefluss
@@ -83,10 +84,13 @@ Die Cloud sendet Zeitstempel **ohne Zeitzone** in chinesischer Standardzeit (UTC
 
 ### Steuerung
 
-Nur diese zwei Einstellungen sind schreibbar, beide gegen die echte Cloud verifiziert:
+Alle Einstellungen liegen im Abschnitt **Konfiguration** des Geräts. Nur diese drei sind schreibbar:
 
-- **Prioritätsmodus** (`select`).
-- **Ladegrenze** (`number`): Die Minjet-App blendet die Limits im Modus *Zuerst entladen* aus, daher ist die Entität dort **nicht verfügbar**. Der Wert muss über der Entladegrenze liegen.
+- **Prioritätsmodus** (`select`), gegen die echte Cloud verifiziert.
+- **Ladegrenze** (`number`), verifiziert. Muss über der Entladegrenze liegen.
+- **Entladegrenze** (`number`), gleicher Endpunkt wie die Ladegrenze, Werte wie in der App (20–100 % in 5er-Schritten). Muss unter der Ladegrenze liegen.
+
+Die Minjet-App blendet beide Limits im Modus *Zuerst entladen* aus, daher sind beide Entitäten dort **nicht verfügbar** (ausgegraut).
 
 Die Nennleistung ist bewusst **nur lesbar**: Bei eingeschaltetem Smart-Meter-Schalter regelt das Gerät sie selbst anhand deines Smart Meters.
 

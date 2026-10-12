@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.4
+- **Discharge limit** is now writable (`number`, 20–100 % in steps of 5, must stay below the charge limit). The old read-only sensor is removed automatically.
+- Both limits are unavailable (greyed out) in *Discharge first* mode, as in the app.
+- Priority mode, both limits and the *Live 5 min* button are now in the **Configuration** section; the *Controls* section is gone.
+
 ## 0.5.3
 - New **Live 5 min** button: about 2-second updates for 5 minutes, like the live view in the Minjet app. The realtime mode is always ended afterwards (`closeRealTimeStatus`), also on reload, unload and Home Assistant shutdown.
 - New **Live active** binary sensor (`on` while live mode runs).

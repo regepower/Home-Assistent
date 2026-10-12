@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from homeassistant.components.select import SelectEntity
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -30,6 +31,7 @@ class MinjetPriorityModeSelect(MinjetEntity, SelectEntity):
     """Battery priority mode: discharge first / energy storage first."""
 
     _attr_translation_key = "priority_mode"
+    _attr_entity_category = EntityCategory.CONFIG
 
     def __init__(self, coordinator: MinjetCoordinator, serial: str) -> None:
         """Initialize the select."""

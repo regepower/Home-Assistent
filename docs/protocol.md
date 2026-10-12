@@ -94,7 +94,7 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 
 ## Schreibzugriffe
 
-> Status: `batteryChargeLimit` und `batteryPriorityModeStatus` **verifiziert** (siehe unten), `batteryDischargeLimit` nur gleicher Pfad, `ratedPower`/`emCommStatus` bewusst nicht getestet. Entscheidung: nur schreiben, wenn nötig; Lesen reicht für HA.
+> Status: `batteryChargeLimit` und `batteryPriorityModeStatus` **verifiziert** (siehe unten), `batteryDischargeLimit` gleicher Pfad, ab Integration 0.5.4 schreibbar (nur App-Werte 20–100 % in 5er-Schritten; Bestätigung am Gerät steht aus), `ratedPower`/`emCommStatus` bewusst nicht getestet. Entscheidung: nur schreiben, wenn nötig; Lesen reicht für HA.
 - Balcony (MH7A): `POST photovoltaic/setRatedPower/{serialNum}` mit JSON `{"key": <Property>, "value": <Wert>}` (dio-Default, keine Sonderheader)
 - Keys in `balcony_settings_view`: `ratedPower`, `batteryChargeLimit`, `batteryDischargeLimit` (20–100 %, Schritt 5), `batteryPriorityModeStatus`, `emCommStatus` (Smart-Meter-Schalter)
 - Stack-Geräte: `POST stacking/setProperty/{id}` mit `{"key","value"}`

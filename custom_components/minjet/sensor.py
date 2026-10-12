@@ -222,13 +222,6 @@ SENSORS: tuple[MinjetSensorDescription, ...] = (
         value_fn=_millivolt("cellVoltMax"),
     ),
     MinjetSensorDescription(
-        key="discharge_limit",
-        translation_key="discharge_limit",
-        native_unit_of_measurement=PERCENTAGE,
-        entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=_prop("batteryDischargeLimit"),
-    ),
-    MinjetSensorDescription(
         key="rated_power",
         translation_key="rated_power",
         device_class=SensorDeviceClass.POWER,

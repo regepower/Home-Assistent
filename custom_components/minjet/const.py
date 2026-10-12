@@ -28,7 +28,9 @@ STALE_AFTER = timedelta(minutes=5)
 PRIORITY_MODES = {0: "discharge_first", 1: "storage_first"}
 PRIORITY_MODE_STORAGE_FIRST = 1
 
-# Only keys that were verified against the real cloud may be written.
+# Only these keys may be written (same endpoint and body for all three; the
+# app offers the discharge limit right next to the charge limit).
 KEY_CHARGE_LIMIT = "batteryChargeLimit"
+KEY_DISCHARGE_LIMIT = "batteryDischargeLimit"
 KEY_PRIORITY_MODE = "batteryPriorityModeStatus"
-WRITABLE_KEYS = frozenset({KEY_CHARGE_LIMIT, KEY_PRIORITY_MODE})
+WRITABLE_KEYS = frozenset({KEY_CHARGE_LIMIT, KEY_DISCHARGE_LIMIT, KEY_PRIORITY_MODE})

@@ -51,14 +51,15 @@ Copy `custom_components/minjet` into the `custom_components` folder of your Home
 | Grid power | sensor | W, **positive = import, negative = export** |
 | Generated total | sensor | kWh, `total_increasing` |
 | Used total | sensor | kWh, `total_increasing` |
-| Temperature 1 / 2, Cell voltage min / max, Discharge limit, Rated power | sensor | diagnostic |
+| Temperature 1 / 2, Cell voltage min / max, Rated power | sensor | diagnostic |
 | Wi-Fi signal | sensor | diagnostic, disabled by default |
 | Online, Smart meter | binary sensor | connectivity |
 | Last warning | sensor | Time of the latest warning (e.g. "Niedrige SOC"); text in the attributes `message` and `title` |
 | Warning | event | Fires `warning` when the cloud issues a **new** message; use it as an automation trigger |
-| Priority mode | select | *Discharge first* / *Storage first* |
-| Charge limit | number | 20–100 %, only in *Storage first* mode |
-| Live 5 min | button | ~2 s updates for 5 minutes, see [Live mode](#live-mode) |
+| Priority mode | select | configuration; *Discharge first* / *Storage first* |
+| Charge limit | number | configuration; 20–100 %, only in *Storage first* mode |
+| Discharge limit | number | configuration; 20–100 % in steps of 5, only in *Storage first* mode |
+| Live 5 min | button | configuration; ~2 s updates for 5 minutes, see [Live mode](#live-mode) |
 | Live active | binary sensor | `on` while live mode runs |
 
 ### Power flow
@@ -88,10 +89,13 @@ The cloud sends timestamps **without a time zone** in China standard time (UTC+8
 
 ### Controls
 
-Only these two settings are writable, and both were verified against the real cloud:
+All settings are in the device's **Configuration** section. Only these three are writable:
 
-- **Priority mode** (`select`).
-- **Charge limit** (`number`). The Minjet app hides the limits in *Discharge first* mode, so the entity is **unavailable** there. The value must be above the discharge limit.
+- **Priority mode** (`select`), verified against the real cloud.
+- **Charge limit** (`number`), verified. Must be above the discharge limit.
+- **Discharge limit** (`number`), same endpoint as the charge limit, values as in the app (20–100 % in steps of 5). Must be below the charge limit.
+
+The Minjet app hides both limits in *Discharge first* mode, so both entities are **unavailable** (greyed out) there.
 
 The rated output power is intentionally **read-only**: while the smart meter switch is on, the device regulates it by itself based on your smart meter.
 

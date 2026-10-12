@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_registry as er
@@ -53,7 +54,7 @@ async def test_api_rejects_unverified_keys(
 ) -> None:
     """Only whitelisted keys can be written; nothing is sent otherwise."""
     api = MinjetApi(async_get_clientsession(hass), USERNAME, PASSWORD)
-    for key in ("ratedPower", "emCommStatus", "batteryDischargeLimit", "evil"):
+    for key in ("ratedPower", "emCommStatus", "evil"):
         with pytest.raises(ValueError, match="not a writable"):
             await api.async_set_property(SERIAL, key, 1)
     assert _writes(mock_cloud) == []
@@ -109,15 +110,53 @@ async def test_select_write_failure(
     assert hass.states.get(entity_id).state == "discharge_first"
 
 
-async def test_charge_limit_unavailable_in_discharge_first(
+async def test_limits_unavailable_in_discharge_first(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
 ) -> None:
-    """The app hides the limits in this mode, so the number is unavailable."""
+    """The app hides the limits in this mode, so both numbers are unavailable."""
     await _setup(hass, mock_entry)
-    entity_id = _entity_id(hass, "number", "charge_limit")
-    assert hass.states.get(entity_id).state == "unavailable"
+    for key in ("charge_limit", "discharge_limit"):
+        entity_id = _entity_id(hass, "number", key)
+        assert hass.states.get(entity_id).state == "unavailable"
+
+
+async def test_settings_are_configuration_entities(
+    hass: HomeAssistant,
+    mock_entry: MockConfigEntry,
+    mock_cloud: AiohttpClientMocker,
+) -> None:
+    """Mode, limits and the live button sit in the configuration section."""
+    await _setup(hass, mock_entry)
+    registry = er.async_get(hass)
+    for platform, key in (
+        ("select", "priority_mode"),
+        ("number", "charge_limit"),
+        ("number", "discharge_limit"),
+        ("button", "live"),
+    ):
+        entry = registry.async_get(_entity_id(hass, platform, key))
+        assert entry.entity_category is EntityCategory.CONFIG
+
+
+async def test_old_discharge_limit_sensor_removed(
+    hass: HomeAssistant,
+    mock_entry: MockConfigEntry,
+    mock_cloud: AiohttpClientMocker,
+) -> None:
+    """The former read-only sensor is removed from the registry on setup."""
+    mock_entry.add_to_hass(hass)
+    registry = er.async_get(hass)
+    registry.async_get_or_create(
+        "sensor", DOMAIN, f"{SERIAL}_discharge_limit", config_entry=mock_entry
+    )
+    assert await hass.config_entries.async_setup(mock_entry.entry_id)
+    await hass.async_block_till_done()
+    assert (
+        registry.async_get_entity_id("sensor", DOMAIN, f"{SERIAL}_discharge_limit")
+        is None
+    )
 
 
 async def test_charge_limit_write_and_validation(
@@ -172,3 +211,33 @@ async def test_switching_mode_makes_charge_limit_unavailable(
         blocking=True,
     )
     assert hass.states.get(number_id).state == "unavailable"
+
+
+async def test_discharge_limit_write_and_validation(
+    hass: HomeAssistant,
+    mock_entry: MockConfigEntry,
+    mock_cloud: AiohttpClientMocker,
+    device: dict[str, Any],
+) -> None:
+    """The discharge limit can be set in storage-first mode; it must stay below the charge limit."""
+    device["properties"]["batteryPriorityModeStatus"] = 1
+    device["properties"]["batteryChargeLimit"] = 90.0
+    register_cloud(mock_cloud, device)
+    mock_cloud.post(WRITE_URL, json={"code": 200, "msg": "success", "data": 30})
+    await _setup(hass, mock_entry)
+    entity_id = _entity_id(hass, "number", "discharge_limit")
+    assert float(hass.states.get(entity_id).state) == 20.0
+    assert hass.states.get(entity_id).attributes["step"] == 5
+
+    await hass.services.async_call(
+        "number", "set_value", {"entity_id": entity_id, "value": 30}, blocking=True
+    )
+    assert _writes(mock_cloud) == [{"key": "batteryDischargeLimit", "value": 30}]
+    assert float(hass.states.get(entity_id).state) == 30.0
+
+    # charge limit is 90 -> 90 is not allowed, nothing is sent
+    with pytest.raises(ServiceValidationError, match="charge limit"):
+        await hass.services.async_call(
+            "number", "set_value", {"entity_id": entity_id, "value": 90}, blocking=True
+        )
+    assert len(_writes(mock_cloud)) == 1

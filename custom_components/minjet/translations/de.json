@@ -70,9 +70,6 @@
       "cell_voltage_max": {
         "name": "Zellspannung max"
       },
-      "discharge_limit": {
-        "name": "Entladegrenze"
-      },
       "rated_power": {
         "name": "Nennleistung"
       },
@@ -106,6 +103,9 @@
     "number": {
       "charge_limit": {
         "name": "Ladegrenze"
+      },
+      "discharge_limit": {
+        "name": "Entladegrenze"
       }
     },
     "select": {
@@ -141,6 +141,9 @@
     },
     "charge_limit_too_low": {
       "message": "Die Ladegrenze muss über der Entladegrenze ({discharge} %) liegen."
+    },
+    "discharge_limit_too_high": {
+      "message": "Die Entladegrenze muss unter der Ladegrenze ({charge} %) liegen."
     }
   }
 }
