@@ -10,7 +10,7 @@ Custom Integration für **Minjet-Balkonspeicher** (entwickelt gegen den **MH7A-4
 
 ## Funktionen
 
-- Batterie (%), Batterieleistung mit Vorzeichen, Batteriezustand, Solarleistung, Ausgangsleistung, Netzleistung (Smart Meter)
+- Batterie (%), Batterieleistung (Laden/Entladen), Batteriezustand, Solarerzeugung, Solar direkt zum Wechselrichter, Abgabe an Wechselrichter, Netzleistung (Smart Meter)
 - Gesamtzähler (kWh) für das Energie-Dashboard und `utility_meter`
 - Online-Status, Smart-Meter-Verbindung, Temperaturen, Zellspannungen, Limits (Diagnose)
 - Steuerung: **Batterie-Prioritätsmodus** und **Ladegrenze**
@@ -102,7 +102,7 @@ utility_meter:
     cycle: daily
 ```
 
-Als Solarquelle im Energie-Dashboard nimmst du *Erzeugte Energie (gesamt)*. Die Cloud meldet keine Lade-/Entladeenergie der Batterie; bei Bedarf einen Integration-Helfer (Riemann-Summe) auf die *Batterieleistung* setzen.
+Als Solarquelle im Energie-Dashboard nimmst du *Erzeugte Energie (gesamt)*. Die Cloud meldet keine Lade-/Entladeenergie der Batterie; bei Bedarf je einen Integration-Helfer (Riemann-Summe) auf *Batterie-Ladeleistung* und *Batterie-Entladeleistung* setzen.
 
 ## Fehlersuche
 

@@ -14,7 +14,7 @@ Custom integration for **Minjet balcony storage batteries** (developed against t
 
 ## Features
 
-- Battery level, signed battery power, battery state, solar power, output power, grid power (smart meter)
+- Battery level, battery charging/discharging power, battery state, solar production, solar direct to inverter, output to inverter, grid power (smart meter)
 - Lifetime energy counters (kWh) for the Energy dashboard and `utility_meter`
 - Online status, smart meter connection, temperatures, cell voltages, limits (diagnostic)
 - Controls: **battery priority mode** and **charge limit**
@@ -107,7 +107,7 @@ utility_meter:
     cycle: daily
 ```
 
-Use *Energy generated (total)* as the solar production source in the Energy dashboard. The cloud does not report battery charge/discharge energy; use an integration (Riemann sum) helper on *Battery power* if you need it.
+Use *Energy generated (total)* as the solar production source in the Energy dashboard. The cloud does not report battery charge/discharge energy; if you need it, add one integration (Riemann sum) helper each on *Battery charging power* and *Battery discharging power*.
 
 ## How it works
 
