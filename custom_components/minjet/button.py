@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from homeassistant.components.button import ButtonEntity
-from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -28,7 +27,6 @@ class MinjetLiveButton(MinjetEntity, ButtonEntity):
     """Updates every ~2 s for 5 minutes, then back to the normal 60 s polling."""
 
     _attr_translation_key = "live"
-    _attr_entity_category = EntityCategory.CONFIG
 
     def __init__(self, coordinator: MinjetCoordinator, serial: str) -> None:
         """Initialize the button."""

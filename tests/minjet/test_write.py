@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers import entity_registry as er
@@ -122,12 +121,12 @@ async def test_limits_unavailable_in_discharge_first(
         assert hass.states.get(entity_id).state == "unavailable"
 
 
-async def test_settings_are_configuration_entities(
+async def test_settings_are_controls(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
 ) -> None:
-    """Mode, limits and the live button sit in the configuration section."""
+    """Mode, limits and the live button have no category (Controls, shown on dashboards)."""
     await _setup(hass, mock_entry)
     registry = er.async_get(hass)
     for platform, key in (
@@ -137,7 +136,7 @@ async def test_settings_are_configuration_entities(
         ("button", "live"),
     ):
         entry = registry.async_get(_entity_id(hass, platform, key))
-        assert entry.entity_category is EntityCategory.CONFIG
+        assert entry.entity_category is None
 
 
 async def test_old_discharge_limit_sensor_removed(

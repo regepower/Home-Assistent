@@ -51,10 +51,10 @@ Ordner `custom_components/minjet` in den Ordner `custom_components` deiner Home-
 | Online, Smart Meter | binary sensor | Konnektivität |
 | Letzte Warnung | sensor | Zeitpunkt der letzten Warnung (z. B. „Niedrige SOC"); Text in den Attributen `message` und `title` |
 | Warnung | event | Löst `warning` aus, wenn die Cloud eine **neue** Meldung ausgibt; als Automations-Trigger nutzbar |
-| Prioritätsmodus | select | Konfiguration; *Zuerst entladen* / *Zuerst speichern* |
-| Ladegrenze | number | Konfiguration; 20–100 %, nur im Modus *Zuerst speichern* |
-| Entladegrenze | number | Konfiguration; 20–100 % in 5er-Schritten, nur im Modus *Zuerst speichern* |
-| Live 5 min | button | Konfiguration; ca. 2-s-Updates für 5 Minuten, siehe [Live-Modus](#live-modus) |
+| Prioritätsmodus | select | *Zuerst entladen* / *Zuerst speichern* |
+| Ladegrenze | number | 20–100 %, nur im Modus *Zuerst speichern* |
+| Entladegrenze | number | 20–100 % in 5er-Schritten, nur im Modus *Zuerst speichern* |
+| Live 5 min | button | ca. 2-s-Updates für 5 Minuten, siehe [Live-Modus](#live-modus) |
 | Live aktiv | binary sensor | `on`, solange der Live-Modus läuft |
 
 ### Energiefluss
@@ -84,7 +84,7 @@ Die Cloud sendet Zeitstempel **ohne Zeitzone** in chinesischer Standardzeit (UTC
 
 ### Steuerung
 
-Alle Einstellungen liegen im Abschnitt **Konfiguration** des Geräts. Nur diese drei sind schreibbar:
+Alle Einstellungen liegen im Abschnitt **Steuerung** des Geräts (auch im automatisch erzeugten Dashboard sichtbar). Nur diese drei sind schreibbar:
 
 - **Prioritätsmodus** (`select`), gegen die echte Cloud verifiziert.
 - **Ladegrenze** (`number`), verifiziert. Muss über der Entladegrenze liegen.

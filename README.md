@@ -56,10 +56,10 @@ Copy `custom_components/minjet` into the `custom_components` folder of your Home
 | Online, Smart meter | binary sensor | connectivity |
 | Last warning | sensor | Time of the latest warning (e.g. "Niedrige SOC"); text in the attributes `message` and `title` |
 | Warning | event | Fires `warning` when the cloud issues a **new** message; use it as an automation trigger |
-| Priority mode | select | configuration; *Discharge first* / *Storage first* |
-| Charge limit | number | configuration; 20–100 %, only in *Storage first* mode |
-| Discharge limit | number | configuration; 20–100 % in steps of 5, only in *Storage first* mode |
-| Live 5 min | button | configuration; ~2 s updates for 5 minutes, see [Live mode](#live-mode) |
+| Priority mode | select | *Discharge first* / *Storage first* |
+| Charge limit | number | 20–100 %, only in *Storage first* mode |
+| Discharge limit | number | 20–100 % in steps of 5, only in *Storage first* mode |
+| Live 5 min | button | ~2 s updates for 5 minutes, see [Live mode](#live-mode) |
 | Live active | binary sensor | `on` while live mode runs |
 
 ### Power flow
@@ -89,7 +89,7 @@ The cloud sends timestamps **without a time zone** in China standard time (UTC+8
 
 ### Controls
 
-All settings are in the device's **Configuration** section. Only these three are writable:
+All settings are in the device's **Controls** section (also shown on the auto-generated dashboard). Only these three are writable:
 
 - **Priority mode** (`select`), verified against the real cloud.
 - **Charge limit** (`number`), verified. Must be above the discharge limit.

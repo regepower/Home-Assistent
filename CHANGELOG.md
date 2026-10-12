@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.5
+- Priority mode, charge limit, discharge limit and *Live 5 min* are back in the **Controls** section (no entity category), so the auto-generated dashboard shows them.
+
 ## 0.5.4
 - **Discharge limit** is now writable (`number`, 20–100 % in steps of 5, must stay below the charge limit). The old read-only sensor is removed automatically.
 - Both limits are unavailable (greyed out) in *Discharge first* mode, as in the app.
