@@ -33,7 +33,7 @@
         "name": "Battery"
       },
       "battery_power": {
-        "name": "Battery power (+ charging / − discharging)"
+        "name": "Battery power"
       },
       "battery_state": {
         "name": "Battery state",
@@ -44,19 +44,19 @@
         }
       },
       "pv_power": {
-        "name": "Solar production"
+        "name": "Solar total"
       },
       "output_power": {
-        "name": "Output to inverter"
+        "name": "To inverter"
       },
       "smart_meter_power": {
-        "name": "Grid power (smart meter)"
+        "name": "Grid power"
       },
       "energy_generated": {
-        "name": "Energy generated (total)"
+        "name": "Generated total"
       },
       "energy_used": {
-        "name": "Energy used (total)"
+        "name": "Used total"
       },
       "temperature_1": {
         "name": "Temperature 1"
@@ -65,10 +65,10 @@
         "name": "Temperature 2"
       },
       "cell_voltage_min": {
-        "name": "Lowest cell voltage"
+        "name": "Cell voltage min"
       },
       "cell_voltage_max": {
-        "name": "Highest cell voltage"
+        "name": "Cell voltage max"
       },
       "discharge_limit": {
         "name": "Discharge limit"
@@ -83,13 +83,13 @@
         "name": "Last warning"
       },
       "battery_charge_power": {
-        "name": "Battery charging power"
+        "name": "Charging power"
       },
       "battery_discharge_power": {
-        "name": "Battery discharging power"
+        "name": "Discharging power"
       },
       "pv_direct_power": {
-        "name": "Solar direct to inverter"
+        "name": "Solar direct"
       }
     },
     "binary_sensor": {
@@ -97,7 +97,7 @@
         "name": "Online"
       },
       "smart_meter_connected": {
-        "name": "Smart meter connected"
+        "name": "Smart meter"
       }
     },
     "number": {
@@ -107,10 +107,10 @@
     },
     "select": {
       "priority_mode": {
-        "name": "Battery priority mode",
+        "name": "Priority mode",
         "state": {
           "discharge_first": "Discharge first",
-          "storage_first": "Energy storage first"
+          "storage_first": "Storage first"
         }
       }
     },

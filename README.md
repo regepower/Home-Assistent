@@ -14,7 +14,7 @@ Custom integration for **Minjet balcony storage batteries** (developed against t
 
 ## Features
 
-- Battery level, battery charging/discharging power, battery state, solar production, solar direct to inverter, output to inverter, grid power (smart meter)
+- Battery level, charging/discharging power, battery state, solar total, solar direct, power to the inverter, grid power (smart meter)
 - Lifetime energy counters (kWh) for the Energy dashboard and `utility_meter`
 - Online status, smart meter connection, temperatures, cell voltages, limits (diagnostic)
 - Controls: **battery priority mode** and **charge limit**
@@ -42,28 +42,28 @@ Copy `custom_components/minjet` into the `custom_components` folder of your Home
 | Entity | Platform | Notes |
 |---|---|---|
 | Battery | sensor | State of charge in % |
-| Battery power (+ charging / − discharging) | sensor | W, signed |
-| Battery charging power / Battery discharging power | sensor | W, always ≥ 0 (for the Energy dashboard or Riemann-sum helpers) |
+| Battery power | sensor | W, signed |
+| Charging power / Discharging power | sensor | W, always ≥ 0 (for the Energy dashboard or Riemann-sum helpers) |
 | Battery state | sensor | `idle`, `charging`, `discharging` |
-| Solar production | sensor | W, everything the panels produce |
-| Solar direct to inverter | sensor | W, solar production minus battery charging |
-| Output to inverter | sensor | W, solar direct + battery discharging |
-| Grid power (smart meter) | sensor | W, **positive = import, negative = export** |
-| Energy generated (total) | sensor | kWh, `total_increasing` |
-| Energy used (total) | sensor | kWh, `total_increasing` |
-| Temperature 1 / 2, lowest / highest cell voltage, discharge limit, rated power | sensor | diagnostic |
+| Solar total | sensor | W, everything the panels produce |
+| Solar direct | sensor | W, solar production minus battery charging |
+| To inverter | sensor | W, solar direct + battery discharging |
+| Grid power | sensor | W, **positive = import, negative = export** |
+| Generated total | sensor | kWh, `total_increasing` |
+| Used total | sensor | kWh, `total_increasing` |
+| Temperature 1 / 2, Cell voltage min / max, Discharge limit, Rated power | sensor | diagnostic |
 | Wi-Fi signal | sensor | diagnostic, disabled by default |
-| Online, Smart meter connected | binary sensor | connectivity |
+| Online, Smart meter | binary sensor | connectivity |
 | Last warning | sensor | Time of the latest warning (e.g. "Niedrige SOC"); text in the attributes `message` and `title` |
 | Warning | event | Fires `warning` when the cloud issues a **new** message; use it as an automation trigger |
-| Battery priority mode | select | *Discharge first* / *Energy storage first* |
-| Charge limit | number | 20–100 %, only in *Energy storage first* mode |
+| Priority mode | select | *Discharge first* / *Storage first* |
+| Charge limit | number | 20–100 %, only in *Storage first* mode |
 
 ### Power flow
 
 ```
-Solar production = Solar direct to inverter + Battery charging power
-Output to inverter = Solar direct to inverter + Battery discharging power
+Solar total = Solar direct + Charging power
+To inverter = Solar direct + Discharging power
 ```
 
 Example while discharging: solar 44.5 W, battery −108 W → output 152.5 W. While charging: solar 137.5 W, battery +38.7 W → output 98.8 W.
@@ -88,7 +88,7 @@ The cloud sends timestamps **without a time zone** in China standard time (UTC+8
 
 Only these two settings are writable, and both were verified against the real cloud:
 
-- **Battery priority mode** (`select`).
+- **Priority mode** (`select`).
 - **Charge limit** (`number`). The Minjet app hides the limits in *Discharge first* mode, so the entity is **unavailable** there. The value must be above the discharge limit.
 
 The rated output power is intentionally **read-only**: while the smart meter switch is on, the device regulates it by itself based on your smart meter.
@@ -107,7 +107,7 @@ utility_meter:
     cycle: daily
 ```
 
-Use *Energy generated (total)* as the solar production source in the Energy dashboard. The cloud does not report battery charge/discharge energy; if you need it, add one integration (Riemann sum) helper each on *Battery charging power* and *Battery discharging power*.
+Use *Generated total* as the solar production source in the Energy dashboard. The cloud does not report battery charge/discharge energy; if you need it, add one integration (Riemann sum) helper each on *Charging power* and *Discharging power*.
 
 ## How it works
 

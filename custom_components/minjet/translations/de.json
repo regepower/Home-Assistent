@@ -33,7 +33,7 @@
         "name": "Batterie"
       },
       "battery_power": {
-        "name": "Batterieleistung (+ Laden / − Entladen)"
+        "name": "Batterieleistung"
       },
       "battery_state": {
         "name": "Batteriezustand",
@@ -44,19 +44,19 @@
         }
       },
       "pv_power": {
-        "name": "Solarerzeugung (gesamt)"
+        "name": "Solar gesamt"
       },
       "output_power": {
-        "name": "Abgabe an Wechselrichter"
+        "name": "Zum Wechselrichter"
       },
       "smart_meter_power": {
-        "name": "Netzleistung (Smart Meter)"
+        "name": "Netzleistung"
       },
       "energy_generated": {
-        "name": "Erzeugte Energie (gesamt)"
+        "name": "Erzeugt gesamt"
       },
       "energy_used": {
-        "name": "Verwendete Energie (gesamt)"
+        "name": "Verbraucht gesamt"
       },
       "temperature_1": {
         "name": "Temperatur 1"
@@ -65,10 +65,10 @@
         "name": "Temperatur 2"
       },
       "cell_voltage_min": {
-        "name": "Niedrigste Zellspannung"
+        "name": "Zellspannung min"
       },
       "cell_voltage_max": {
-        "name": "Höchste Zellspannung"
+        "name": "Zellspannung max"
       },
       "discharge_limit": {
         "name": "Entladegrenze"
@@ -83,13 +83,13 @@
         "name": "Letzte Warnung"
       },
       "battery_charge_power": {
-        "name": "Batterie-Ladeleistung"
+        "name": "Ladeleistung"
       },
       "battery_discharge_power": {
-        "name": "Batterie-Entladeleistung"
+        "name": "Entladeleistung"
       },
       "pv_direct_power": {
-        "name": "Solar direkt zum Wechselrichter"
+        "name": "Solar direkt"
       }
     },
     "binary_sensor": {
@@ -97,7 +97,7 @@
         "name": "Online"
       },
       "smart_meter_connected": {
-        "name": "Smart Meter verbunden"
+        "name": "Smart Meter"
       }
     },
     "number": {
@@ -107,10 +107,10 @@
     },
     "select": {
       "priority_mode": {
-        "name": "Batterie-Prioritätsmodus",
+        "name": "Prioritätsmodus",
         "state": {
           "discharge_first": "Zuerst entladen",
-          "storage_first": "Energiespeicherung zuerst"
+          "storage_first": "Zuerst speichern"
         }
       }
     },

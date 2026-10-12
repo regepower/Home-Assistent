@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.5.1
+- All entity names and states shortened to at most 18 characters so they fit the companion app (for example *Solar total*, *Solar direct*, *To inverter*, *Charging power*, *Priority mode* / *Storage first*). A test enforces the limit for German and English.
+
 ## 0.5.0
 - Clearer names: *Solar production* (total), *Output to inverter*, *Battery power (+ charging / − discharging)*. Entity IDs stay the same.
 - New sensors: *Battery charging power*, *Battery discharging power* (both ≥ 0) and *Solar direct to inverter* (solar production minus charging).

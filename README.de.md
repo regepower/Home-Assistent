@@ -10,10 +10,10 @@ Custom Integration für **Minjet-Balkonspeicher** (entwickelt gegen den **MH7A-4
 
 ## Funktionen
 
-- Batterie (%), Batterieleistung (Laden/Entladen), Batteriezustand, Solarerzeugung, Solar direkt zum Wechselrichter, Abgabe an Wechselrichter, Netzleistung (Smart Meter)
+- Batterie (%), Lade-/Entladeleistung, Batteriezustand, Solar gesamt, Solar direkt, Leistung zum Wechselrichter, Netzleistung (Smart Meter)
 - Gesamtzähler (kWh) für das Energie-Dashboard und `utility_meter`
 - Online-Status, Smart-Meter-Verbindung, Temperaturen, Zellspannungen, Limits (Diagnose)
-- Steuerung: **Batterie-Prioritätsmodus** und **Ladegrenze**
+- Steuerung: **Prioritätsmodus** und **Ladegrenze**
 - Reauth-Dialog, Diagnose-Download (Zugangsdaten und Seriennummer geschwärzt), deutsche und englische Texte
 
 ## Voraussetzungen
@@ -38,27 +38,27 @@ Ordner `custom_components/minjet` in den Ordner `custom_components` deiner Home-
 | Entität | Plattform | Hinweis |
 |---|---|---|
 | Batterie | sensor | Ladezustand in % |
-| Batterieleistung (+ Laden / − Entladen) | sensor | W, mit Vorzeichen |
-| Batterie-Ladeleistung / Batterie-Entladeleistung | sensor | W, immer ≥ 0 (für Energie-Dashboard oder Riemann-Summe) |
+| Batterieleistung | sensor | W, **+ = lädt, − = entlädt** |
+| Ladeleistung / Entladeleistung | sensor | W, immer ≥ 0 (für Energie-Dashboard oder Riemann-Summe) |
 | Batteriezustand | sensor | `idle`, `charging`, `discharging` |
-| Solarerzeugung (gesamt) | sensor | W, alles, was die Panels erzeugen |
-| Solar direkt zum Wechselrichter | sensor | W, Solarerzeugung minus Batterie-Ladung |
-| Abgabe an Wechselrichter | sensor | W, Solar direkt + Batterie-Entladung |
-| Netzleistung (Smart Meter) | sensor | W, **positiv = Bezug, negativ = Einspeisung** |
-| Erzeugte / Verwendete Energie (gesamt) | sensor | kWh, `total_increasing` |
+| Solar gesamt | sensor | W, alles, was die Panels erzeugen |
+| Solar direkt | sensor | W, Solar gesamt minus Ladeleistung |
+| Zum Wechselrichter | sensor | W, Solar direkt + Entladeleistung |
+| Netzleistung | sensor | W, **positiv = Bezug, negativ = Einspeisung** |
+| Erzeugt gesamt / Verbraucht gesamt | sensor | kWh, `total_increasing` |
 | Temperatur 1/2, Zellspannung min/max, Entladegrenze, Nennleistung | sensor | Diagnose |
 | WLAN-Signal | sensor | Diagnose, standardmäßig deaktiviert |
-| Online, Smart Meter verbunden | binary sensor | Konnektivität |
+| Online, Smart Meter | binary sensor | Konnektivität |
 | Letzte Warnung | sensor | Zeitpunkt der letzten Warnung (z. B. „Niedrige SOC"); Text in den Attributen `message` und `title` |
 | Warnung | event | Löst `warning` aus, wenn die Cloud eine **neue** Meldung ausgibt; als Automations-Trigger nutzbar |
-| Batterie-Prioritätsmodus | select | *Zuerst entladen* / *Energiespeicherung zuerst* |
-| Ladegrenze | number | 20–100 %, nur im Modus *Energiespeicherung zuerst* |
+| Prioritätsmodus | select | *Zuerst entladen* / *Zuerst speichern* |
+| Ladegrenze | number | 20–100 %, nur im Modus *Zuerst speichern* |
 
 ### Energiefluss
 
 ```
-Solarerzeugung (gesamt)   = Solar direkt zum Wechselrichter + Batterie-Ladeleistung
-Abgabe an Wechselrichter  = Solar direkt zum Wechselrichter + Batterie-Entladeleistung
+Solar gesamt       = Solar direkt + Ladeleistung
+Zum Wechselrichter = Solar direkt + Entladeleistung
 ```
 
 Beispiel beim Entladen: Solar 44,5 W, Batterie −108 W → Abgabe 152,5 W. Beim Laden: Solar 137,5 W, Batterie +38,7 W → Abgabe 98,8 W.
@@ -83,7 +83,7 @@ Die Cloud sendet Zeitstempel **ohne Zeitzone** in chinesischer Standardzeit (UTC
 
 Nur diese zwei Einstellungen sind schreibbar, beide gegen die echte Cloud verifiziert:
 
-- **Batterie-Prioritätsmodus** (`select`).
+- **Prioritätsmodus** (`select`).
 - **Ladegrenze** (`number`): Die Minjet-App blendet die Limits im Modus *Zuerst entladen* aus, daher ist die Entität dort **nicht verfügbar**. Der Wert muss über der Entladegrenze liegen.
 
 Die Nennleistung ist bewusst **nur lesbar**: Bei eingeschaltetem Smart-Meter-Schalter regelt das Gerät sie selbst anhand deines Smart Meters.
@@ -102,7 +102,7 @@ utility_meter:
     cycle: daily
 ```
 
-Als Solarquelle im Energie-Dashboard nimmst du *Erzeugte Energie (gesamt)*. Die Cloud meldet keine Lade-/Entladeenergie der Batterie; bei Bedarf je einen Integration-Helfer (Riemann-Summe) auf *Batterie-Ladeleistung* und *Batterie-Entladeleistung* setzen.
+Als Solarquelle im Energie-Dashboard nimmst du *Erzeugt gesamt*. Die Cloud meldet keine Lade-/Entladeenergie der Batterie; bei Bedarf je einen Integration-Helfer (Riemann-Summe) auf *Ladeleistung* und *Entladeleistung* setzen.
 
 ## Fehlersuche
 
