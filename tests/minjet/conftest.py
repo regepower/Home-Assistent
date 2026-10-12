@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Generator
 from copy import deepcopy
 from typing import Any
-from unittest.mock import patch
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -128,12 +126,3 @@ def mock_entry() -> MockConfigEntry:
         title=USERNAME,
         data={"username": USERNAME, "password": PASSWORD},
     )
-
-
-@pytest.fixture
-def no_websocket() -> Generator[None]:
-    """Do not open a real WebSocket during setup."""
-    with patch(
-        "custom_components.minjet.coordinator.MinjetCoordinator.start_websocket"
-    ):
-        yield

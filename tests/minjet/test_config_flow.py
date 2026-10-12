@@ -18,7 +18,7 @@ USER_INPUT = {"username": USERNAME, "password": PASSWORD}
 
 
 async def test_user_flow_success(
-    hass: HomeAssistant, mock_cloud: AiohttpClientMocker, no_websocket: None
+    hass: HomeAssistant, mock_cloud: AiohttpClientMocker
 ) -> None:
     """A valid login creates an entry."""
     result = await hass.config_entries.flow.async_init(
@@ -35,7 +35,7 @@ async def test_user_flow_success(
 
 
 async def test_user_flow_invalid_auth_then_recover(
-    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker, no_websocket: None
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
 ) -> None:
     """Wrong credentials show an error and the form can be retried."""
     aioclient_mock.post(f"{BASE_URL}/login", json={"code": 500, "msg": "bad"})
@@ -92,7 +92,6 @@ async def test_reauth(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
 ) -> None:
     """Reauth stores the new password and reloads the entry."""
     mock_entry.add_to_hass(hass)

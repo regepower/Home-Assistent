@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0
+- **Important fix:** the integration no longer keeps a WebSocket open. An open WebSocket switches the device into a 2-second realtime upload mode that the Minjet app normally ends when its live view closes; keeping it open permanently made the device drop offline (app and Home Assistant showed no values). The integration now only polls the cloud every 60 s (`cloud_polling`).
+- Warning messages are read every 10 minutes instead of every minute.
+- Please update and re-enable the integration if you disabled it because of the outage.
+
 ## 0.3.0
 - New `event` entity "Warning": fires when the cloud issues a new warning message (for example low SOC). The message known at startup does not fire.
 - New diagnostic `sensor` "Last warning" (timestamp, message and title as attributes).

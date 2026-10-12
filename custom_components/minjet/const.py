@@ -5,16 +5,15 @@ from datetime import timedelta
 DOMAIN = "minjet"
 
 BASE_URL = "https://app.minjet-energy.com/prod-api"
-WS_URL = "wss://app.minjet-energy.com/ws/device"
 
-# REST polling is only a fallback; live data arrives through the WebSocket.
+# The device reports every 60 s on its own; polling faster gains nothing.
+# A permanently open WebSocket keeps the device in a 2 s "realtime" upload mode
+# (the app ends that mode when its live view closes), which made the device drop
+# offline in practice, so this integration only polls.
 SCAN_INTERVAL = timedelta(seconds=60)
 
-# Ignore WebSocket pushes that arrive faster than this (the cloud sends ~1/s).
-WS_MIN_UPDATE_INTERVAL = 5.0
-WS_RECEIVE_TIMEOUT = 120
-WS_BACKOFF_MIN = 5
-WS_BACKOFF_MAX = 300
+# Warning messages are issued about once a day; no need to ask every minute.
+NOTICE_INTERVAL = timedelta(minutes=10)
 
 # batteryPriorityModeStatus: confirmed against the app (0 = discharge first).
 PRIORITY_MODES = {0: "discharge_first", 1: "storage_first"}

@@ -33,7 +33,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: MinjetConfigEntry) -> bo
     entry.runtime_data = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    coordinator.start_websocket()
     return True
 
 

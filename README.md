@@ -4,7 +4,7 @@
 [![Validate](https://github.com/regepower/Minjet/actions/workflows/validate.yml/badge.svg)](https://github.com/regepower/Minjet/actions/workflows/validate.yml)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 
-Custom integration for **Minjet balcony storage batteries** (developed against the **MH7A-48**). It talks to the same cloud as the official Minjet app and delivers live data via WebSocket (`cloud_push`), with a 60 s REST poll as fallback.
+Custom integration for **Minjet balcony storage batteries** (developed against the **MH7A-48**). It talks to the same cloud as the official Minjet app and polls it every 60 s (`cloud_polling`), the same interval the device itself reports at.
 
 🇩🇪 [Deutsche Anleitung](README.de.md)
 
@@ -101,8 +101,8 @@ Use *Energy generated (total)* as the solar production source in the Energy dash
 ## How it works
 
 - Login: `POST /login`, bearer token; an expired token is renewed automatically; you are only asked to reauthenticate if the login itself fails.
-- Live data: a WebSocket pushes the full device object about once per second while connected. Updates are applied at most every 5 s.
-- Fallback: the device list is polled every 60 s; if the WebSocket drops it reconnects with back-off.
+- Data: the device list (including all live values) is polled every 60 s; warning messages every 10 minutes.
+- **No WebSocket on purpose:** the cloud also offers a live WebSocket, but while it is open the device is switched to a 2-second "realtime" upload mode. The Minjet app ends that mode when you leave its live view; a permanently open connection kept the device in it and made it drop offline (seen with version 0.3.0). Polling every 60 s matches what the app does in the background.
 - Writes: a single REST call per change; the new value is shown immediately and confirmed by the next update.
 
 Details of the reverse engineering are in [`docs/`](docs).
@@ -121,7 +121,7 @@ Details of the reverse engineering are in [`docs/`](docs).
 
 ## Privacy and security
 
-Credentials are stored in Home Assistant's config entry storage and only sent to `app.minjet-energy.com`. The WebSocket URL contains your session token (that is how the vendor's service works), so do not post debug logs that include it publicly. Nothing is sent anywhere else.
+Credentials are stored in Home Assistant's config entry storage and only sent to `app.minjet-energy.com`. Nothing is sent anywhere else. Do not post debug logs publicly without checking them for tokens.
 
 ## Development
 

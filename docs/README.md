@@ -41,7 +41,7 @@ export MINJET_PASS='...'
 python3 tools/minjet_probe.py --out /tmp/minjet.json --ws 60
 ```
 
-- `--ws SEK`: WebSocket zusätzlich SEK Sekunden mitschneiden
+- `--ws SEK`: WebSocket zusätzlich SEK Sekunden mitschneiden (**nur kurz verwenden**: solange der WebSocket offen ist, steht das Gerät im 2-s-Echtzeit-Modus)
 - `--extra`: zusätzlich Statistik und Benachrichtigungen abrufen
 - `--set KEY=VALUE`: **schreibt** einen Wert am Gerät (nur `batteryChargeLimit`, `batteryDischargeLimit`, `batteryPriorityModeStatus`), zeigt Wert vor/nach 5 s. Gegen das echte Gerät verifiziert sind `batteryChargeLimit` und `batteryPriorityModeStatus`; `ratedPower` und `emCommStatus` sind bewusst gesperrt
 - `--raw`: nicht maskieren (nur lokal ansehen, nie teilen)

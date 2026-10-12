@@ -73,7 +73,6 @@ async def test_select_priority_mode(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
 ) -> None:
     """Selecting a mode writes 0/1 and updates the state optimistically."""
     mock_cloud.post(WRITE_URL, json={"code": 200, "msg": "success", "data": 1})
@@ -95,7 +94,6 @@ async def test_select_write_failure(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
 ) -> None:
     """A rejected write raises and leaves the state untouched."""
     mock_cloud.post(WRITE_URL, json={"code": 500, "msg": "offline"})
@@ -115,7 +113,6 @@ async def test_charge_limit_unavailable_in_discharge_first(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
 ) -> None:
     """The app hides the limits in this mode, so the number is unavailable."""
     await _setup(hass, mock_entry)
@@ -127,7 +124,6 @@ async def test_charge_limit_write_and_validation(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
     device: dict[str, Any],
 ) -> None:
     """In storage-first mode the limit can be set; it must exceed the discharge limit."""
@@ -156,7 +152,6 @@ async def test_switching_mode_makes_charge_limit_unavailable(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
     device: dict[str, Any],
 ) -> None:
     """Writing mode 0 hides the limit again."""

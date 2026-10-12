@@ -2,7 +2,7 @@
 
 🇬🇧 [English documentation](README.md)
 
-Custom Integration für **Minjet-Balkonspeicher** (entwickelt gegen den **MH7A-48**). Sie nutzt dieselbe Cloud wie die offizielle Minjet-App und liefert Live-Daten per WebSocket (`cloud_push`), mit einem REST-Abruf alle 60 s als Rückfallebene.
+Custom Integration für **Minjet-Balkonspeicher** (entwickelt gegen den **MH7A-48**). Sie nutzt dieselbe Cloud wie die offizielle Minjet-App und fragt sie alle 60 s ab (`cloud_polling`), im selben Takt, in dem das Gerät selbst meldet.
 
 > **Inoffiziell.** Dieses Projekt steht in keiner Verbindung zu Minjet und wird nicht von Minjet unterstützt. Die Cloud-Schnittstelle wurde zur Interoperabilität mit dem eigenen Gerät per Reverse Engineering ermittelt und kann sich jederzeit ändern. Nutzung auf eigene Gefahr.
 
@@ -107,7 +107,11 @@ Als Solarquelle im Energie-Dashboard nimmst du *Erzeugte Energie (gesamt)*. Die 
 
 ## Datenschutz und Sicherheit
 
-Zugangsdaten liegen im Config-Entry-Speicher von Home Assistant und gehen nur an `app.minjet-energy.com`. Die WebSocket-URL enthält deinen Sitzungs-Token (so arbeitet der Dienst des Herstellers); Debug-Logs mit diesem Token nicht öffentlich posten. Es wird nichts an andere Stellen gesendet.
+Zugangsdaten liegen im Config-Entry-Speicher von Home Assistant und gehen nur an `app.minjet-energy.com`. Es wird nichts an andere Stellen gesendet. Debug-Logs vor dem Veröffentlichen auf Tokens prüfen.
+
+## Warum kein Live-WebSocket?
+
+Die Cloud bietet auch einen Live-WebSocket an. Solange er offen ist, schaltet die Cloud das Gerät aber in einen 2-Sekunden-„Echtzeit"-Upload. Die Minjet-App beendet diesen Modus, sobald man ihre Live-Ansicht verlässt. Eine dauerhaft offene Verbindung (Version 0.3.0) hielt das Gerät in diesem Modus und ließ es offline gehen. Deshalb fragt die Integration nur noch alle 60 s ab, wie die App im Hintergrund.
 
 ## Entwicklung
 

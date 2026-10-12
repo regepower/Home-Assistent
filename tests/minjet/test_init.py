@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import asyncio
 from typing import Any
-from unittest.mock import AsyncMock, patch
 
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
@@ -12,11 +10,10 @@ from homeassistant.helpers import device_registry as dr, entity_registry as er
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.minjet.api import MinjetAuthError, MinjetConnectionError
 from custom_components.minjet.const import BASE_URL, DOMAIN
 from custom_components.minjet.diagnostics import async_get_config_entry_diagnostics
 
-from .conftest import SERIAL
+from .conftest import SERIAL, register_cloud
 
 
 def _state(hass: HomeAssistant, platform: str, key: str) -> Any:
@@ -37,7 +34,6 @@ async def test_setup_creates_entities(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
 ) -> None:
     """Values from the device list show up with the right units and signs."""
     await _setup(hass, mock_entry)
@@ -63,42 +59,17 @@ async def test_setup_creates_entities(
     assert device.sw_version == "0.03.28"
 
 
-async def test_push_update_and_throttle(
-    hass: HomeAssistant,
-    mock_entry: MockConfigEntry,
-    mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
-    device: dict[str, Any],
-) -> None:
-    """A pushed device replaces values; bursts inside the throttle are ignored."""
-    await _setup(hass, mock_entry)
-    coordinator = mock_entry.runtime_data
-
-    device["properties"].update(
-        batteryStatus=1, batteryPower=38.7, batteryPercentage=48
-    )
-    coordinator.async_handle_push(device)
-    await hass.async_block_till_done()
-    assert float(_state(hass, "sensor", "battery_power").state) == 38.7
-    assert _state(hass, "sensor", "battery_state").state == "charging"
-
-    device["properties"]["batteryPercentage"] = 10
-    coordinator.async_handle_push(device)  # inside throttle window -> ignored
-    await hass.async_block_till_done()
-    assert _state(hass, "sensor", "battery_level").state == "48"
-
-
 async def test_offline_device(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
     device: dict[str, Any],
 ) -> None:
     """deviceStatus != 1 turns the online sensor off."""
     await _setup(hass, mock_entry)
     device["deviceStatus"] = "0"
-    mock_entry.runtime_data.async_handle_push(device)
+    register_cloud(mock_cloud, device)
+    await mock_entry.runtime_data.async_refresh()
     await hass.async_block_till_done()
     assert _state(hass, "binary_sensor", "online").state == "off"
 
@@ -107,7 +78,6 @@ async def test_setup_retry_on_connection_error(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     aioclient_mock: AiohttpClientMocker,
-    no_websocket: None,
 ) -> None:
     """A cloud outage during setup is retried, not failed permanently."""
     aioclient_mock.post(f"{BASE_URL}/login", status=503)
@@ -120,7 +90,6 @@ async def test_setup_auth_failure_starts_reauth(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     aioclient_mock: AiohttpClientMocker,
-    no_websocket: None,
 ) -> None:
     """Wrong credentials put the entry into reauth."""
     aioclient_mock.post(f"{BASE_URL}/login", json={"code": 500, "msg": "bad"})
@@ -134,7 +103,6 @@ async def test_unload(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
 ) -> None:
     """Unloading removes the entities' availability."""
     await _setup(hass, mock_entry)
@@ -147,7 +115,6 @@ async def test_diagnostics_redacts(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
-    no_websocket: None,
 ) -> None:
     """Credentials and identifiers never appear in diagnostics."""
     await _setup(hass, mock_entry)
@@ -158,84 +125,15 @@ async def test_diagnostics_redacts(
     assert result["devices"][0]["properties"]["batteryPercentage"] == 49.0
 
 
-async def test_websocket_loop_reconnects_and_applies_push(
-    hass: HomeAssistant,
-    mock_entry: MockConfigEntry,
-    mock_cloud: AiohttpClientMocker,
-    device: dict[str, Any],
-) -> None:
-    """After a connection error the loop reconnects and pushes reach the entities."""
-    calls = 0
-
-    async def fake_ws(_api: Any, on_device: Any) -> None:
-        nonlocal calls
-        calls += 1
-        if calls == 1:
-            raise MinjetConnectionError("lost")
-        device["properties"]["batteryPercentage"] = 77
-        on_device(device)
-        await asyncio.Event().wait()  # stay connected
-
-    with (
-        patch("custom_components.minjet.api.MinjetApi.async_run_websocket", fake_ws),
-        patch("custom_components.minjet.coordinator.asyncio.sleep", AsyncMock()),
-    ):
-        await _setup(hass, mock_entry)
-        for _ in range(10):
-            await hass.async_block_till_done()
-            if calls >= 2:
-                break
-        await hass.async_block_till_done()
-        assert calls >= 2
-        assert _state(hass, "sensor", "battery_level").state == "77"
-        await hass.config_entries.async_unload(mock_entry.entry_id)
-
-
-async def test_websocket_auth_error_relogs_in_without_reauth(
+async def test_polling_only_no_websocket(
     hass: HomeAssistant,
     mock_entry: MockConfigEntry,
     mock_cloud: AiohttpClientMocker,
 ) -> None:
-    """A rejected WebSocket token is renewed by a fresh login, no reauth prompt."""
-    calls = 0
-
-    async def fake_ws(_api: Any, on_device: Any) -> None:
-        nonlocal calls
-        calls += 1
-        if calls == 1:
-            raise MinjetAuthError("token expired")
-        await asyncio.Event().wait()
-
-    with (
-        patch("custom_components.minjet.api.MinjetApi.async_run_websocket", fake_ws),
-        patch("custom_components.minjet.coordinator.asyncio.sleep", AsyncMock()),
-    ):
-        await _setup(hass, mock_entry)
-        for _ in range(10):
-            await hass.async_block_till_done()
-            if calls >= 2:
-                break
-        assert calls >= 2
-        assert not list(mock_entry.async_get_active_flows(hass, {"reauth"}))
-        logins = [c for c in mock_cloud.mock_calls if str(c[1]).endswith("/login")]
-        assert len(logins) >= 2  # initial login + renewal after the rejection
-        await hass.config_entries.async_unload(mock_entry.entry_id)
-
-
-async def test_websocket_auth_error_with_bad_credentials_starts_reauth(
-    hass: HomeAssistant,
-    mock_entry: MockConfigEntry,
-    mock_cloud: AiohttpClientMocker,
-) -> None:
-    """If the renewal login is rejected too, the user is asked to reauthenticate."""
-
-    async def fake_ws(_api: Any, on_device: Any) -> None:
-        # the password stops working between setup and the WebSocket rejection
-        mock_cloud.clear_requests()
-        mock_cloud.post(f"{BASE_URL}/login", json={"code": 500, "msg": "bad"})
-        raise MinjetAuthError("token expired")
-
-    with patch("custom_components.minjet.api.MinjetApi.async_run_websocket", fake_ws):
-        await _setup(hass, mock_entry)
-        await hass.async_block_till_done()
-    assert any(mock_entry.async_get_active_flows(hass, {"reauth"}))
+    """Only REST calls are made: no WebSocket keeps the device in realtime mode."""
+    await _setup(hass, mock_entry)
+    urls = {str(call[1]) for call in mock_cloud.mock_calls}
+    assert all(
+        url.startswith("https://app.minjet-energy.com/prod-api/") for url in urls
+    )
+    assert not any("/ws/" in url for url in urls)

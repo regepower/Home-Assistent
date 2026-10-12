@@ -140,3 +140,9 @@ Status: Login, Geräteliste und PV-Abfrage am 2026-10-10 live gegen die Cloud ve
 - Folge: Die naiven Strings (z. B. `"time": "2026-10-10 13:16:54"`) in `app/notice/*` sind **UTC+8**. Die Minjet-App zeigt sie ungewandelt an (deshalb „immer 13:16"). Die HA-Integration wandelt sie nach UTC (`SERVER_TZ = UTC+8`, China kennt keine Sommerzeit).
 - Die Warnung scheint ein täglicher Server-Job um 13:16 (UTC+8) zu sein, kein Echtzeit-Ereignis beim Unterschreiten der SOC-Grenze.
 - `app/notice/queryAppNoticeList` → `data.deviceList[]` mit `serialNum`, `lastMessage{text,time,title}`, `unReadMessageCount`; die Integration nutzt das für Sensor „Letzte Warnung" und das Event „Warnung".
+
+## Wichtig: WebSocket hält das Gerät im Echtzeit-Modus (2026-10-11/12)
+- Beobachtung: Mit Integration 0.3.0 (WebSocket dauerhaft offen) ging das Gerät kurz nach dem Einrichten offline: weder App noch HA zeigten Werte. Nach dem Deaktivieren der Integration war das Gerät in der App wieder online.
+- Hintergrund: Solange ein WebSocket offen ist, steht `uploadCycle` auf 2 s (sonst 60 s). Die App beendet diesen Modus aktiv: `_closeRealtimeCycle()` in `balcony_detail_view.dart` ruft beim Verlassen der Live-Ansicht `photovoltaic/closeRealTimeStatus/{id}` auf. Ein dauerhaft offener Client beendet ihn nie.
+- Folge für HA (ab 0.4.0): kein WebSocket mehr, nur REST-Abruf alle 60 s (entspricht dem normalen Upload-Takt), Meldungen alle 10 min.
+- Nicht ausgeschlossen, aber nicht belegt: Die Cloud erlaubt nur eine Sitzung pro Konto. Falls die App weiterhin abgemeldet wird, eigenes Konto für HA testen.
