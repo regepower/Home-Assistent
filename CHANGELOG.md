@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2
+- German names use Σ instead of „gesamt“: *Solar Σ*, *Erzeugt Σ*, *Verbraucht Σ* (English names and entity IDs unchanged).
+- README: fixed `utility_meter` example entity IDs.
+
 ## 0.5.1
 - All entity names and states shortened to at most 18 characters so they fit the companion app (for example *Solar total*, *Solar direct*, *To inverter*, *Charging power*, *Priority mode* / *Storage first*). A test enforces the limit for German and English.
 

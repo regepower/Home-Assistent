@@ -100,10 +100,10 @@ The cloud's "today" and "month" fields are actually lifetime totals, and its sta
 ```yaml
 utility_meter:
   minjet_solar_daily:
-    source: sensor.akku_energy_generated_total   # adjust to your device name
+    source: sensor.akku_generated_total   # entity ID of "Generated total"
     cycle: daily
   minjet_used_daily:
-    source: sensor.akku_energy_used_total
+    source: sensor.akku_used_total        # entity ID of "Used total"
     cycle: daily
 ```
 

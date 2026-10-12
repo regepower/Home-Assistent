@@ -10,7 +10,7 @@ Custom Integration für **Minjet-Balkonspeicher** (entwickelt gegen den **MH7A-4
 
 ## Funktionen
 
-- Batterie (%), Lade-/Entladeleistung, Batteriezustand, Solar gesamt, Solar direkt, Leistung zum Wechselrichter, Netzleistung (Smart Meter)
+- Batterie (%), Lade-/Entladeleistung, Batteriezustand, Solar Σ, Solar direkt, Leistung zum Wechselrichter, Netzleistung (Smart Meter)
 - Gesamtzähler (kWh) für das Energie-Dashboard und `utility_meter`
 - Online-Status, Smart-Meter-Verbindung, Temperaturen, Zellspannungen, Limits (Diagnose)
 - Steuerung: **Prioritätsmodus** und **Ladegrenze**
@@ -41,11 +41,11 @@ Ordner `custom_components/minjet` in den Ordner `custom_components` deiner Home-
 | Batterieleistung | sensor | W, **+ = lädt, − = entlädt** |
 | Ladeleistung / Entladeleistung | sensor | W, immer ≥ 0 (für Energie-Dashboard oder Riemann-Summe) |
 | Batteriezustand | sensor | `idle`, `charging`, `discharging` |
-| Solar gesamt | sensor | W, alles, was die Panels erzeugen |
-| Solar direkt | sensor | W, Solar gesamt minus Ladeleistung |
+| Solar Σ | sensor | W, alles, was die Panels erzeugen |
+| Solar direkt | sensor | W, Solar Σ minus Ladeleistung |
 | Zum Wechselrichter | sensor | W, Solar direkt + Entladeleistung |
 | Netzleistung | sensor | W, **positiv = Bezug, negativ = Einspeisung** |
-| Erzeugt gesamt / Verbraucht gesamt | sensor | kWh, `total_increasing` |
+| Erzeugt Σ / Verbraucht Σ | sensor | kWh, `total_increasing` |
 | Temperatur 1/2, Zellspannung min/max, Entladegrenze, Nennleistung | sensor | Diagnose |
 | WLAN-Signal | sensor | Diagnose, standardmäßig deaktiviert |
 | Online, Smart Meter | binary sensor | Konnektivität |
@@ -57,7 +57,7 @@ Ordner `custom_components/minjet` in den Ordner `custom_components` deiner Home-
 ### Energiefluss
 
 ```
-Solar gesamt       = Solar direkt + Ladeleistung
+Solar Σ       = Solar direkt + Ladeleistung
 Zum Wechselrichter = Solar direkt + Entladeleistung
 ```
 
@@ -95,14 +95,14 @@ Die Felder „heute" und „Monat" der Cloud sind in Wirklichkeit Gesamtzähler,
 ```yaml
 utility_meter:
   minjet_solar_taeglich:
-    source: sensor.akku_energy_generated_total   # an den Gerätenamen anpassen
+    source: sensor.akku_generated_total   # Entitäts-ID von „Erzeugt Σ“ eintragen
     cycle: daily
   minjet_verbrauch_taeglich:
-    source: sensor.akku_energy_used_total
+    source: sensor.akku_used_total        # Entitäts-ID von „Verbraucht Σ“
     cycle: daily
 ```
 
-Als Solarquelle im Energie-Dashboard nimmst du *Erzeugt gesamt*. Die Cloud meldet keine Lade-/Entladeenergie der Batterie; bei Bedarf je einen Integration-Helfer (Riemann-Summe) auf *Ladeleistung* und *Entladeleistung* setzen.
+Als Solarquelle im Energie-Dashboard nimmst du *Erzeugt Σ*. Die Cloud meldet keine Lade-/Entladeenergie der Batterie; bei Bedarf je einen Integration-Helfer (Riemann-Summe) auf *Ladeleistung* und *Entladeleistung* setzen.
 
 ## Fehlersuche
 

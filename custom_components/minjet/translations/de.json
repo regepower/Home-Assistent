@@ -44,7 +44,7 @@
         }
       },
       "pv_power": {
-        "name": "Solar gesamt"
+        "name": "Solar Σ"
       },
       "output_power": {
         "name": "Zum Wechselrichter"
@@ -53,10 +53,10 @@
         "name": "Netzleistung"
       },
       "energy_generated": {
-        "name": "Erzeugt gesamt"
+        "name": "Erzeugt Σ"
       },
       "energy_used": {
-        "name": "Verbraucht gesamt"
+        "name": "Verbraucht Σ"
       },
       "temperature_1": {
         "name": "Temperatur 1"
