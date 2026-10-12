@@ -109,6 +109,10 @@ Als Solarquelle im Energie-Dashboard nimmst du *Erzeugte Energie (gesamt)*. Die 
 
 Zugangsdaten liegen im Config-Entry-Speicher von Home Assistant und gehen nur an `app.minjet-energy.com`. Es wird nichts an andere Stellen gesendet. Debug-Logs vor dem Veröffentlichen auf Tokens prüfen.
 
+## Zuletzt bekannte Werte
+
+Fehlt ein Wert in der Cloud-Antwort, nach einem Neustart oder während einer kurzen Störung (bis 5 Minuten), zeigt die Integration den zuletzt bekannten Wert statt *unbekannt*/*nicht verfügbar*. Ob das Gerät selbst noch meldet, zeigt der Sensor *Online*.
+
 ## Warum kein Live-WebSocket?
 
 Die Cloud bietet auch einen Live-WebSocket an. Solange er offen ist, schaltet die Cloud das Gerät aber in einen 2-Sekunden-„Echtzeit"-Upload. Die Minjet-App beendet diesen Modus, sobald man ihre Live-Ansicht verlässt. Eine dauerhaft offene Verbindung (Version 0.3.0) hielt das Gerät in diesem Modus und ließ es offline gehen. Deshalb fragt die Integration nur noch alle 60 s ab, wie die App im Hintergrund.

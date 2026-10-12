@@ -15,6 +15,9 @@ SCAN_INTERVAL = timedelta(seconds=60)
 # Warning messages are issued about once a day; no need to ask every minute.
 NOTICE_INTERVAL = timedelta(minutes=10)
 
+# Keep showing the last values during short cloud hiccups before going unavailable.
+STALE_AFTER = timedelta(minutes=5)
+
 # batteryPriorityModeStatus: confirmed against the app (0 = discharge first).
 PRIORITY_MODES = {0: "discharge_first", 1: "storage_first"}
 PRIORITY_MODE_STORAGE_FIRST = 1

@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import time
 from typing import Any
 
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DOMAIN, STALE_AFTER
 from .coordinator import MinjetCoordinator
 
 
@@ -42,5 +43,12 @@ class MinjetEntity(CoordinatorEntity[MinjetCoordinator]):
 
     @property
     def available(self) -> bool:
-        """Return True while the device is known to the coordinator."""
-        return super().available and self._serial in self.coordinator.data
+        """Stay available with the last values during short cloud outages."""
+        if self._serial not in (self.coordinator.data or {}):
+            return False
+        if self.coordinator.last_update_success:
+            return True
+        last = self.coordinator.last_success
+        return (
+            last is not None and time.monotonic() - last < STALE_AFTER.total_seconds()
+        )

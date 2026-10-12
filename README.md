@@ -102,6 +102,7 @@ Use *Energy generated (total)* as the solar production source in the Energy dash
 
 - Login: `POST /login`, bearer token; an expired token is renewed automatically; you are only asked to reauthenticate if the login itself fails.
 - Data: the device list (including all live values) is polled every 60 s; warning messages every 10 minutes.
+- Last known values: if the cloud leaves a value out, after a restart, or during a short outage (up to 5 minutes) the last known value is shown instead of *unknown*/*unavailable*. Check the *Online* sensor to see whether the device itself is reporting.
 - **No WebSocket on purpose:** the cloud also offers a live WebSocket, but while it is open the device is switched to a 2-second "realtime" upload mode. The Minjet app ends that mode when you leave its live view; a permanently open connection kept the device in it and made it drop offline (seen with version 0.3.0). Polling every 60 s matches what the app does in the background.
 - Writes: a single REST call per change; the new value is shown immediately and confirmed by the next update.
 

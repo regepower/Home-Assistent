@@ -34,6 +34,7 @@ class MinjetCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         self.api = api
         self._notices_fetched: float | None = None
         self._last_notices: dict[str, dict[str, Any]] = {}
+        self.last_success: float | None = None
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         try:
@@ -42,6 +43,7 @@ class MinjetCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             raise ConfigEntryAuthFailed(str(err)) from err
         except MinjetError as err:
             raise UpdateFailed(str(err)) from err
+        _keep_last_known_values(devices, self.data or {})
         now = time.monotonic()
         if (
             self._notices_fetched is None
@@ -58,7 +60,15 @@ class MinjetCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         for serial, notice in self._last_notices.items():
             if serial in devices:
                 devices[serial]["notice"] = notice
+        self.last_success = now
         return devices
+
+    async def _async_refresh(self, *args: Any, **kwargs: Any) -> None:
+        await super()._async_refresh(*args, **kwargs)
+        if not self.last_update_success:
+            # Repeated failures do not notify listeners; let the entities re-check
+            # whether the last values are now too old (STALE_AFTER).
+            self.async_update_listeners()
 
     async def async_set_property(self, serial: str, key: str, value: int) -> None:
         """Write a property and update the local state optimistically.
@@ -79,3 +89,16 @@ class MinjetCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         device["properties"] = {**(device.get("properties") or {}), key: value}
         data[serial] = device
         self.async_set_updated_data(data)
+
+
+def _keep_last_known_values(
+    devices: dict[str, dict[str, Any]], previous: dict[str, dict[str, Any]]
+) -> None:
+    """Fill properties the cloud left out (missing or null) with the last value."""
+    for serial, device in devices.items():
+        old = (previous.get(serial) or {}).get("properties") or {}
+        new = device.get("properties") or {}
+        device["properties"] = {
+            **old,
+            **{key: value for key, value in new.items() if value is not None},
+        }

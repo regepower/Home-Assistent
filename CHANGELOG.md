@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.1
+- Sensors keep their last known value instead of showing *unknown* when the cloud leaves a value out (missing or `null`).
+- After a Home Assistant restart, sensors show the last value from before the restart until the cloud delivers a new one.
+- Short cloud outages (up to 5 minutes) keep the last values instead of switching everything to *unavailable*; longer outages still show *unavailable*.
+
 ## 0.4.0
 - **Important fix:** the integration no longer keeps a WebSocket open. An open WebSocket switches the device into a 2-second realtime upload mode that the Minjet app normally ends when its live view closes; keeping it open permanently made the device drop offline (app and Home Assistant showed no values). The integration now only polls the cloud every 60 s (`cloud_polling`).
 - Warning messages are read every 10 minutes instead of every minute.
