@@ -57,6 +57,28 @@ def _battery_power(props: dict[str, Any]) -> float | None:
     return abs(power) * sign
 
 
+def _battery_flow(status: int) -> Callable[[dict[str, Any]], float | None]:
+    """Unsigned charging (status 1) or discharging (status 2) power, else 0."""
+
+    def value(props: dict[str, Any]) -> float | None:
+        power = props.get("batteryPower")
+        current = props.get("batteryStatus")
+        if power is None or current is None:
+            return None
+        return abs(power) if current == status else 0.0
+
+    return value
+
+
+def _pv_direct(props: dict[str, Any]) -> float | None:
+    """Solar power that goes straight to the inverter (production minus charging)."""
+    pv = props.get("photovoltaicPower")
+    charging = _battery_flow(1)(props)
+    if pv is None or charging is None:
+        return None
+    return round(max(pv - charging, 0.0), 1)
+
+
 def _millivolt(key: str) -> Callable[[dict[str, Any]], float | None]:
     def value(props: dict[str, Any]) -> float | None:
         raw = props.get(key)
@@ -104,6 +126,30 @@ SENSORS: tuple[MinjetSensorDescription, ...] = (
         native_unit_of_measurement=UnitOfPower.WATT,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=_prop("photovoltaicPower"),
+    ),
+    MinjetSensorDescription(
+        key="battery_charge_power",
+        translation_key="battery_charge_power",
+        device_class=SensorDeviceClass.POWER,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_battery_flow(1),
+    ),
+    MinjetSensorDescription(
+        key="battery_discharge_power",
+        translation_key="battery_discharge_power",
+        device_class=SensorDeviceClass.POWER,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_battery_flow(2),
+    ),
+    MinjetSensorDescription(
+        key="pv_direct_power",
+        translation_key="pv_direct_power",
+        device_class=SensorDeviceClass.POWER,
+        native_unit_of_measurement=UnitOfPower.WATT,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=_pv_direct,
     ),
     MinjetSensorDescription(
         key="output_power",

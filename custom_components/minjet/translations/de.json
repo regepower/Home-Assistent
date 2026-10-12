@@ -33,7 +33,7 @@
         "name": "Batterie"
       },
       "battery_power": {
-        "name": "Batterieleistung"
+        "name": "Batterieleistung (+ Laden / − Entladen)"
       },
       "battery_state": {
         "name": "Batteriezustand",
@@ -44,10 +44,10 @@
         }
       },
       "pv_power": {
-        "name": "Solarleistung"
+        "name": "Solarerzeugung (gesamt)"
       },
       "output_power": {
-        "name": "Ausgangsleistung"
+        "name": "Abgabe an Wechselrichter"
       },
       "smart_meter_power": {
         "name": "Netzleistung (Smart Meter)"
@@ -81,6 +81,15 @@
       },
       "last_warning": {
         "name": "Letzte Warnung"
+      },
+      "battery_charge_power": {
+        "name": "Batterie-Ladeleistung"
+      },
+      "battery_discharge_power": {
+        "name": "Batterie-Entladeleistung"
+      },
+      "pv_direct_power": {
+        "name": "Solar direkt zum Wechselrichter"
       }
     },
     "binary_sensor": {

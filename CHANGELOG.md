@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0
+- Clearer names: *Solar production* (total), *Output to inverter*, *Battery power (+ charging / − discharging)*. Entity IDs stay the same.
+- New sensors: *Battery charging power*, *Battery discharging power* (both ≥ 0) and *Solar direct to inverter* (solar production minus charging).
+- README explains the power flow with real examples.
+
 ## 0.4.1
 - Sensors keep their last known value instead of showing *unknown* when the cloud leaves a value out (missing or `null`).
 - After a Home Assistant restart, sensors show the last value from before the restart until the cloud delivers a new one.

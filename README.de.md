@@ -38,10 +38,12 @@ Ordner `custom_components/minjet` in den Ordner `custom_components` deiner Home-
 | Entität | Plattform | Hinweis |
 |---|---|---|
 | Batterie | sensor | Ladezustand in % |
-| Batterieleistung | sensor | W, **positiv = lädt, negativ = entlädt** |
+| Batterieleistung (+ Laden / − Entladen) | sensor | W, mit Vorzeichen |
+| Batterie-Ladeleistung / Batterie-Entladeleistung | sensor | W, immer ≥ 0 (für Energie-Dashboard oder Riemann-Summe) |
 | Batteriezustand | sensor | `idle`, `charging`, `discharging` |
-| Solarleistung | sensor | W |
-| Ausgangsleistung | sensor | W, zum Wechselrichter |
+| Solarerzeugung (gesamt) | sensor | W, alles, was die Panels erzeugen |
+| Solar direkt zum Wechselrichter | sensor | W, Solarerzeugung minus Batterie-Ladung |
+| Abgabe an Wechselrichter | sensor | W, Solar direkt + Batterie-Entladung |
 | Netzleistung (Smart Meter) | sensor | W, **positiv = Bezug, negativ = Einspeisung** |
 | Erzeugte / Verwendete Energie (gesamt) | sensor | kWh, `total_increasing` |
 | Temperatur 1/2, Zellspannung min/max, Entladegrenze, Nennleistung | sensor | Diagnose |
@@ -51,6 +53,15 @@ Ordner `custom_components/minjet` in den Ordner `custom_components` deiner Home-
 | Warnung | event | Löst `warning` aus, wenn die Cloud eine **neue** Meldung ausgibt; als Automations-Trigger nutzbar |
 | Batterie-Prioritätsmodus | select | *Zuerst entladen* / *Energiespeicherung zuerst* |
 | Ladegrenze | number | 20–100 %, nur im Modus *Energiespeicherung zuerst* |
+
+### Energiefluss
+
+```
+Solarerzeugung (gesamt)   = Solar direkt zum Wechselrichter + Batterie-Ladeleistung
+Abgabe an Wechselrichter  = Solar direkt zum Wechselrichter + Batterie-Entladeleistung
+```
+
+Beispiel beim Entladen: Solar 44,5 W, Batterie −108 W → Abgabe 152,5 W. Beim Laden: Solar 137,5 W, Batterie +38,7 W → Abgabe 98,8 W.
 
 ### Warnmeldungen
 

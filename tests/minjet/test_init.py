@@ -137,3 +137,27 @@ async def test_polling_only_no_websocket(
         url.startswith("https://app.minjet-energy.com/prod-api/") for url in urls
     )
     assert not any("/ws/" in url for url in urls)
+
+
+async def test_power_flow_sensors(
+    hass: HomeAssistant,
+    mock_entry: MockConfigEntry,
+    mock_cloud: AiohttpClientMocker,
+    device: dict[str, Any],
+) -> None:
+    """Charge/discharge split and solar-direct follow output = PV - charge + discharge."""
+    await _setup(hass, mock_entry)  # sample: discharging 108 W, PV 44.5 W
+    assert float(_state(hass, "sensor", "battery_discharge_power").state) == 108.0
+    assert float(_state(hass, "sensor", "battery_charge_power").state) == 0.0
+    assert float(_state(hass, "sensor", "pv_direct_power").state) == 44.5
+
+    # charging: PV 137.5 W, 38.7 W into the battery, 98.8 W to the inverter
+    device["properties"].update(
+        batteryStatus=1, batteryPower=38.7, photovoltaicPower=137.5, outputPower=98.8
+    )
+    register_cloud(mock_cloud, device)
+    await mock_entry.runtime_data.async_refresh()
+    await hass.async_block_till_done()
+    assert float(_state(hass, "sensor", "battery_charge_power").state) == 38.7
+    assert float(_state(hass, "sensor", "battery_discharge_power").state) == 0.0
+    assert float(_state(hass, "sensor", "pv_direct_power").state) == 98.8

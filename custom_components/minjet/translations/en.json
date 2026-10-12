@@ -33,7 +33,7 @@
         "name": "Battery"
       },
       "battery_power": {
-        "name": "Battery power"
+        "name": "Battery power (+ charging / − discharging)"
       },
       "battery_state": {
         "name": "Battery state",
@@ -44,10 +44,10 @@
         }
       },
       "pv_power": {
-        "name": "Solar power"
+        "name": "Solar production"
       },
       "output_power": {
-        "name": "Output power"
+        "name": "Output to inverter"
       },
       "smart_meter_power": {
         "name": "Grid power (smart meter)"
@@ -81,6 +81,15 @@
       },
       "last_warning": {
         "name": "Last warning"
+      },
+      "battery_charge_power": {
+        "name": "Battery charging power"
+      },
+      "battery_discharge_power": {
+        "name": "Battery discharging power"
+      },
+      "pv_direct_power": {
+        "name": "Solar direct to inverter"
       }
     },
     "binary_sensor": {

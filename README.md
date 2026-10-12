@@ -42,10 +42,12 @@ Copy `custom_components/minjet` into the `custom_components` folder of your Home
 | Entity | Platform | Notes |
 |---|---|---|
 | Battery | sensor | State of charge in % |
-| Battery power | sensor | W, **positive = charging, negative = discharging** |
+| Battery power (+ charging / − discharging) | sensor | W, signed |
+| Battery charging power / Battery discharging power | sensor | W, always ≥ 0 (for the Energy dashboard or Riemann-sum helpers) |
 | Battery state | sensor | `idle`, `charging`, `discharging` |
-| Solar power | sensor | W |
-| Output power | sensor | W, to the inverter |
+| Solar production | sensor | W, everything the panels produce |
+| Solar direct to inverter | sensor | W, solar production minus battery charging |
+| Output to inverter | sensor | W, solar direct + battery discharging |
 | Grid power (smart meter) | sensor | W, **positive = import, negative = export** |
 | Energy generated (total) | sensor | kWh, `total_increasing` |
 | Energy used (total) | sensor | kWh, `total_increasing` |
@@ -56,6 +58,15 @@ Copy `custom_components/minjet` into the `custom_components` folder of your Home
 | Warning | event | Fires `warning` when the cloud issues a **new** message; use it as an automation trigger |
 | Battery priority mode | select | *Discharge first* / *Energy storage first* |
 | Charge limit | number | 20–100 %, only in *Energy storage first* mode |
+
+### Power flow
+
+```
+Solar production = Solar direct to inverter + Battery charging power
+Output to inverter = Solar direct to inverter + Battery discharging power
+```
+
+Example while discharging: solar 44.5 W, battery −108 W → output 152.5 W. While charging: solar 137.5 W, battery +38.7 W → output 98.8 W.
 
 ### Warning messages
 
